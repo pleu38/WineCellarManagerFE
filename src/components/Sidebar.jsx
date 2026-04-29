@@ -69,9 +69,9 @@ export default function Sidebar({ page, navigate, totalBottles }) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="avatar">M</div>
+        <div className="avatar">P</div>
         <div className="user-info">
-          <div className="user-name">Marc Dubois</div>
+          <div className="user-name">Pierre-Louis</div>
           <div className="user-status">Cave No. 1</div>
         </div>
       </div>

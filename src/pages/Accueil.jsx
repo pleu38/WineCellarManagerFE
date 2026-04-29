@@ -16,6 +16,11 @@ function todayLabel() {
   return new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
+function greeting() {
+  const h = new Date().getHours()
+  return h >= 18 ? 'Bonsoir' : 'Bonjour'
+}
+
 export default function Accueil({ navigate }) {
   const [lastWines, setLastWines] = useState([])
   const [history, setHistory] = useState([])
@@ -63,11 +68,11 @@ export default function Accueil({ navigate }) {
         <div className="hero-content">
           <div className="hero-greeting">
             <span className="pulse-dot" />
-            Bonsoir · {todayLabel()}
+            {greeting()} · {todayLabel()}
           </div>
           <h1 className="hero-title">
             Votre cave compte<br />
-            <em>{totalBottles} bouteilles</em>
+            <em>{totalBottles} vins</em>
           </h1>
           <p className="hero-desc">
             Gérez votre collection, suivez vos entrées et sorties, et explorez les
@@ -88,7 +93,7 @@ export default function Accueil({ navigate }) {
 
         <div className="hero-stats">
           <div>
-            <div className="hero-stat-label">Bouteilles</div>
+            <div className="hero-stat-label">Vins</div>
             <div className="hero-stat-value">{totalBottles}</div>
             <div className="hero-stat-trend">Inventaire total</div>
           </div>

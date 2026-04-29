@@ -1394,29 +1394,146 @@ h1 em {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Responsive */
-@media (max-width: 1100px) {
+/* ── Responsive ──────────────────────────────────────────── */
+
+/* Tablette large (< 1200px) : ajustements grilles */
+@media (max-width: 1200px) {
+  main { padding: 32px 36px; }
   .quick-access { grid-template-columns: repeat(2, 1fr); }
   .home-grid { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .stat-card { grid-column: span 6; }
   .stat-card.feature { grid-column: span 12; }
   .chart-card { grid-column: span 12; }
   .region-card { grid-column: span 12; }
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .history-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Tablette (< 1024px) : sidebar réduite à icônes seules */
+@media (max-width: 1024px) {
+  .app { grid-template-columns: 72px 1fr; }
+
+  aside { padding: 24px 0; width: 72px; overflow: hidden; }
+
+  .brand { justify-content: center; padding: 0 0 24px; }
+  .brand > div:last-child { display: none; }
+
+  .nav-label { display: none; }
+
+  .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+    border-radius: 0;
+  }
+  .nav-item > span { display: none; }
+  .nav-item.active::before { top: 6px; bottom: 6px; }
+
+  .sidebar-footer { justify-content: center; padding: 12px 0; }
+  .user-info { display: none; }
+}
+
+/* Tablette portrait (< 768px) */
 @media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; }
-  aside { position: relative; height: auto; }
-  main { padding: 24px; }
-  h1, .hero-title { font-size: 36px; }
-  .hero { padding: 32px 24px; }
+  main { padding: 24px 20px; }
+  h1, .hero-title { font-size: 40px; }
+  .hero { padding: 36px 28px; }
+  .hero-title { font-size: 44px; }
   .add-layout { grid-template-columns: 1fr; }
   .preview-card { position: relative; top: 0; }
   .stat-card { grid-column: span 12; }
-  .entry { grid-template-columns: 56px 1fr; gap: 12px; }
-  .entry-quantity, .entry-tag { grid-column: 2; justify-self: start; }
   .form-row, .form-row.three { grid-template-columns: 1fr; }
+  .type-selector { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Mobile (< 600px) : sidebar → barre de navigation bas d'écran */
+@media (max-width: 600px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  aside {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    padding: 0;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    overflow: visible;
+  }
+
+  .brand { display: none; }
+  .nav-label { display: none; }
+  .sidebar-footer { display: none; }
+
+  nav {
+    flex: 1;
+    flex-direction: row;
+    display: flex;
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 4px;
+    gap: 3px;
+    border-radius: 0;
+    font-size: 9px;
+    height: 100%;
+  }
+
+  /* réaffiche le label en très petit */
+  .nav-item > span { display: block !important; font-size: 9px; }
+
+  .nav-icon { width: 20px; height: 20px; }
+
+  .nav-item.active::before {
+    left: 0; right: 0; top: 0; bottom: auto;
+    height: 2px;
+    width: auto;
+    border-radius: 0 0 2px 2px;
+  }
+
+  main {
+    padding: 20px 16px 80px;
+    width: 100%;
+  }
+
+  h1, .hero-title { font-size: 32px; }
+  .hero { padding: 24px 20px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .hero-stat-value { font-size: 28px; }
+
+  .quick-access { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .quick-card { padding: 16px; }
+
+  .wine-grid { grid-template-columns: 1fr; }
+
+  .entry {
+    grid-template-columns: 52px 1fr;
+    gap: 12px;
+  }
+  .entry-quantity, .entry-tag {
+    grid-column: 2;
+    justify-self: start;
+  }
+
   .history-stats { grid-template-columns: repeat(2, 1fr); }
-  .quick-access { grid-template-columns: 1fr; }
+  .stat-card { grid-column: span 12; }
+
+  .form-row, .form-row.three { grid-template-columns: 1fr; }
+  .type-selector { grid-template-columns: repeat(3, 1fr); }
+
+  .analytics-grid { grid-template-columns: 1fr; }
+  .chart-card, .region-card, .stat-card.feature { grid-column: auto; }
 }
