@@ -1,22 +1,65 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import {
   getSumCru,
   getSumRegion,
   getAnalyticsByRegion,
   getAnalyticsByMillesime,
   getAverageCru,
+  getAnalyticsByCouleur,
 } from '../api/wineApi'
 
+const COULEUR_CONFIG = {
+  Rouge:        { color: '#8b1538' },
+  Blanc:        { color: '#b8884a' },
+  Rosé:         { color: '#d68c95' },
+  Effervescent: { color: '#4a8f56' },
+  Liqueur:      { color: '#c98639' },
+}
+
 const REGION_COLORS = [
-  'var(--bordeaux)',
-  'var(--gold)',
-  'var(--green)',
-  'var(--amber)',
-  'var(--rose)',
-  'var(--text-muted)',
-  'var(--bordeaux-bright)',
-  '#6a9fb5',
+  '#8b1538', '#b8884a', '#4a8f56', '#c98639',
+  '#d68c95', '#9d8e87', '#b91c4a', '#6a9fb5',
+  '#7b68ee', '#20b2aa',
 ]
+
+function normalizeCouleur(raw) {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw
+  return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite }))
+}
+
+function DonutChart({ segments, size = 180, strokeWidth = 30 }) {
+  const r = (size - strokeWidth) / 2
+  const C = 2 * Math.PI * r
+  const GAP = 4
+  const total = segments.reduce((s, d) => s + d.value, 0)
+  if (total === 0) return null
+  let offset = 0
+  const arcs = segments.map((seg) => {
+    const length = Math.max((seg.value / total) * C - GAP, 0)
+    const arc = { ...seg, length, offset }
+    offset += length + GAP
+    return arc
+  })
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#f3ede6" strokeWidth={strokeWidth} />
+      <g transform={`rotate(-90, ${size / 2}, ${size / 2})`}>
+        {arcs.map((arc, i) => (
+          <circle
+            key={i}
+            cx={size / 2} cy={size / 2} r={r}
+            fill="none"
+            stroke={arc.color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${arc.length} ${C}`}
+            strokeDashoffset={-arc.offset}
+          />
+        ))}
+      </g>
+    </svg>
+  )
+}
 
 export default function Analytique() {
   const [totalBottles, setTotalBottles] = useState(null)
@@ -24,8 +67,8 @@ export default function Analytique() {
   const [regionData, setRegionData] = useState([])
   const [millesimeData, setMillesimeData] = useState([])
   const [average, setAverage] = useState(null)
+  const [couleurData, setCouleurData] = useState([])
   const [loading, setLoading] = useState(true)
-  const barsVisible = useRef(false)
 
   useEffect(() => {
     Promise.allSettled([
@@ -34,7 +77,8 @@ export default function Analytique() {
       getAnalyticsByRegion(),
       getAnalyticsByMillesime(),
       getAverageCru(),
-    ]).then(([sum, sumR, regions, millesimes, avg]) => {
+      getAnalyticsByCouleur(),
+    ]).then(([sum, sumR, regions, millesimes, avg, couleur]) => {
       if (sum.status === 'fulfilled' && sum.value?.[0]?.somme != null)
         setTotalBottles(Math.round(sum.value[0].somme))
       if (sumR.status === 'fulfilled' && sumR.value?.[0]?.compte_region != null)
@@ -44,12 +88,20 @@ export default function Analytique() {
         setMillesimeData(millesimes.value.sort((a, b) => a.millesime - b.millesime))
       if (avg.status === 'fulfilled' && avg.value?.[0]?.moyenne != null)
         setAverage(Math.round(avg.value[0].moyenne * 10) / 10)
+      if (couleur.status === 'fulfilled')
+        setCouleurData(normalizeCouleur(couleur.value))
       setLoading(false)
     })
   }, [])
 
   const maxMillesime = Math.max(...millesimeData.map((m) => m.quantite), 1)
-  const maxRegion = Math.max(...regionData.map((r) => r.quantite), 1)
+  const totalCouleur = couleurData.reduce((s, c) => s + (c.quantite || 0), 0)
+
+  const regionSegments = regionData.slice(0, 10).map((r, i) => ({
+    value: r.quantite,
+    color: REGION_COLORS[i % REGION_COLORS.length],
+    label: r.region,
+  }))
 
   if (loading) {
     return (
@@ -65,9 +117,7 @@ export default function Analytique() {
     <section className="page">
       <div className="page-header">
         <div>
-          <h1>
-            Analytique <em>de la cave</em>
-          </h1>
+          <h1>Analytique <em>de la cave</em></h1>
           <div className="subtitle">Vue d'ensemble</div>
         </div>
       </div>
@@ -84,7 +134,7 @@ export default function Analytique() {
             </div>
           </div>
           <div className="stat-value">
-            {totalBottles ?? '—'}<span className="stat-unit">bouteilles</span>
+            {totalBottles ?? '—'}<span className="stat-unit">vins différents</span>
           </div>
           <div className="stat-trend" style={{ color: 'rgba(255,220,230,0.9)' }}>
             {totalRegions ? `${totalRegions} régions représentées` : ''}
@@ -119,7 +169,30 @@ export default function Analytique() {
           <div className="stat-trend warn">Bouteilles / cru</div>
         </div>
 
-        {/* Millesime chart */}
+        {/* Color breakdown cards */}
+        {couleurData.length > 0 && (
+          <div className="couleur-cards">
+            {couleurData.map((c) => {
+              const cfg = COULEUR_CONFIG[c.type_vin] ?? { color: '#9d8e87' }
+              const pct = totalCouleur > 0 ? Math.round((c.quantite / totalCouleur) * 100) : 0
+              return (
+                <div className="couleur-card" key={c.type_vin} style={{ '--cc-color': cfg.color }}>
+                  <div className="cc-header">
+                    <span className="cc-dot" />
+                    <span className="cc-label">{c.type_vin}</span>
+                  </div>
+                  <div className="cc-value">{c.quantite}</div>
+                  <div className="cc-bar-wrap">
+                    <div className="cc-bar" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="cc-pct">{pct} %</div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Millesime bar chart */}
         {millesimeData.length > 0 && (
           <div className="chart-card">
             <h3>Par millésime</h3>
@@ -142,25 +215,22 @@ export default function Analytique() {
           </div>
         )}
 
-        {/* Region bars */}
+        {/* Region donut chart */}
         {regionData.length > 0 && (
-          <div className="region-card">
+          <div className="donut-card">
             <h3>Par région</h3>
-            {regionData.map((r, i) => (
-              <div className="region-row" key={r.region}>
-                <span className="region-name">{r.region}</span>
-                <div className="region-bar-wrap">
-                  <div
-                    className="region-bar"
-                    style={{
-                      width: `${Math.round((r.quantite / maxRegion) * 100)}%`,
-                      background: REGION_COLORS[i % REGION_COLORS.length],
-                    }}
-                  />
-                </div>
-                <span className="region-count">{r.quantite}</span>
+            <div className="donut-body">
+              <DonutChart segments={regionSegments} />
+              <div className="donut-legend">
+                {regionSegments.map((seg, i) => (
+                  <div className="donut-legend-item" key={i}>
+                    <span className="donut-legend-dot" style={{ background: seg.color }} />
+                    <span className="donut-legend-label">{seg.label}</span>
+                    <span className="donut-legend-count">{seg.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         )}
       </div>
