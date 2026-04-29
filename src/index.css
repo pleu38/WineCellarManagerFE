@@ -1355,6 +1355,173 @@ h1 em {
 .entry-tag.cadeau { color: #8a6420; border-color: rgba(184, 136, 74, 0.3); background: #fdf6e3; }
 .entry-tag.repas { color: var(--bordeaux); border-color: rgba(139, 21, 56, 0.2); background: var(--bordeaux-soft); }
 
+/* ── TIMELINE (Historique) ───────────────────────────────── */
+.timeline {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+/* Ligne verticale fil conducteur */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--bordeaux-soft) 2%,
+    var(--bordeaux) 8%,
+    var(--bordeaux) 92%,
+    var(--bordeaux-soft) 98%,
+    transparent 100%
+  );
+}
+
+/* Séparateur de mois — losange sur la ligne */
+.tl-month-sep {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 0 16px 56px;
+}
+
+.tl-month-sep::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 14px;
+  height: 14px;
+  background: var(--bordeaux);
+  border-radius: 2px;
+  box-shadow: 0 0 0 3px var(--bordeaux-soft);
+}
+
+.tl-month-label {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  font-style: italic;
+  color: var(--text);
+}
+
+.tl-month-badge {
+  background: var(--bordeaux-soft);
+  color: var(--bordeaux);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  border: 1px solid rgba(139, 21, 56, 0.15);
+  font-weight: 500;
+}
+
+/* Item de timeline */
+.tl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+/* Rond jour — positionné sur la ligne */
+.tl-dot {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--bordeaux);
+  box-shadow: 0 0 0 4px var(--bordeaux-soft), 0 2px 8px rgba(139, 21, 56, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.tl-day-num {
+  font-family: 'Instrument Serif', serif;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--bordeaux);
+}
+
+.tl-day-name {
+  font-family: 'Geist Mono', monospace;
+  font-size: 7px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+/* Carte bouteille */
+.tl-card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(60, 30, 35, 0.03);
+  margin-top: 1px;
+  min-width: 0;
+}
+
+.tl-card:hover {
+  border-color: var(--bordeaux);
+  box-shadow: 0 4px 12px rgba(60, 30, 35, 0.06);
+  transform: translateX(2px);
+}
+
+.tl-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tl-wine-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.tl-card-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.tl-qty {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tl-qty strong {
+  font-family: 'Instrument Serif', serif;
+  font-size: 17px;
+  color: var(--text);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.tl-context {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
 /* EMPTY STATE */
 .empty-state {
   text-align: center;
@@ -1536,4 +1703,9 @@ h1 em {
 
   .analytics-grid { grid-template-columns: 1fr; }
   .chart-card, .region-card, .stat-card.feature { grid-column: auto; }
+
+  /* Timeline mobile */
+  .tl-month-sep { padding-left: 52px; }
+  .tl-card-top { flex-direction: column; align-items: flex-start; }
+  .tl-card-right { flex-wrap: wrap; }
 }

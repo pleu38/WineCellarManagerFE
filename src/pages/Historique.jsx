@@ -65,12 +65,8 @@ export default function Historique() {
     <section className="page">
       <div className="page-header">
         <div>
-          <h1>
-            Historique <em>des sorties</em>
-          </h1>
-          <div className="subtitle">
-            {history.length} bouteilles consommées au total
-          </div>
+          <h1>Historique <em>des sorties</em></h1>
+          <div className="subtitle">{history.length} bouteilles consommées au total</div>
         </div>
         <button className="btn ghost">
           <svg className="btn-icon" viewBox="0 0 24 24">
@@ -89,30 +85,22 @@ export default function Historique() {
         <div className="stat-card">
           <div className="stat-label" style={{ marginBottom: 12 }}>Type favori</div>
           <div className="stat-value" style={{ fontSize: 28 }}>{favType}</div>
-          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>
-            Le plus consommé
-          </div>
+          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>Le plus consommé</div>
         </div>
         <div className="stat-card">
           <div className="stat-label" style={{ marginBottom: 12 }}>Total sorties</div>
           <div className="stat-value" style={{ fontSize: 28 }}>{history.length}</div>
-          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>
-            Depuis le début
-          </div>
+          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>Depuis le début</div>
         </div>
         <div className="stat-card">
           <div className="stat-label" style={{ marginBottom: 12 }}>Pour offrir</div>
           <div className="stat-value">{totalGifts}</div>
-          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>
-            Cadeaux offerts
-          </div>
+          <div className="stat-trend" style={{ color: 'var(--text-muted)' }}>Cadeaux offerts</div>
         </div>
       </div>
 
       {loading && (
-        <div className="loading">
-          <span className="spinner" /> Chargement de l'historique…
-        </div>
+        <div className="loading"><span className="spinner" /> Chargement de l'historique…</div>
       )}
 
       {!loading && history.length === 0 && (
@@ -122,44 +110,62 @@ export default function Historique() {
         </div>
       )}
 
-      {grouped.map(([month, entries]) => (
-        <div className="month-section" key={month}>
-          <div className="month-header">
-            <div className="month-title">{month.charAt(0).toUpperCase() + month.slice(1)}</div>
-            <div className="month-badge">{entries.length} sortie{entries.length > 1 ? 's' : ''}</div>
-          </div>
-
-          {entries.map((e, i) => {
-            const d = new Date(e.date_mouvement)
-            return (
-              <div className="entry" key={i}>
-                <div className="entry-date">
-                  <div className="entry-day-num">
-                    {String(d.getDate()).padStart(2, '0')}
-                  </div>
-                  <div className="entry-day-name">
-                    {d.toLocaleDateString('fr-FR', { weekday: 'short' })}
-                  </div>
-                </div>
-                <div className="entry-info">
-                  <div className="entry-name">
-                    {e.cru} {e.millesime ?? ''}
-                  </div>
-                  <div className="entry-context">
-                    {e.raison_sortie ?? ''}{e.origine_mouvement ? ` · ${e.origine_mouvement}` : ''}
-                  </div>
-                </div>
-                <div className="entry-quantity">
-                  btl<strong>{e.qte_mouvement}</strong>
-                </div>
-                <div className={`entry-tag ${tagClass(e.raison_sortie)}`}>
-                  {tagLabel(e.raison_sortie)}
-                </div>
+      {!loading && grouped.length > 0 && (
+        <div className="timeline">
+          {grouped.map(([month, entries]) => (
+            <div key={month}>
+              {/* Séparateur de mois — losange sur la ligne */}
+              <div className="tl-month-sep">
+                <span className="tl-month-label">
+                  {month.charAt(0).toUpperCase() + month.slice(1)}
+                </span>
+                <span className="tl-month-badge">
+                  {entries.length} sortie{entries.length > 1 ? 's' : ''}
+                </span>
               </div>
-            )
-          })}
+
+              {entries.map((e, i) => {
+                const d = new Date(e.date_mouvement)
+                return (
+                  <div className="tl-item" key={i}>
+                    {/* Rond sur la ligne */}
+                    <div className="tl-dot">
+                      <span className="tl-day-num">
+                        {String(d.getDate()).padStart(2, '0')}
+                      </span>
+                      <span className="tl-day-name">
+                        {d.toLocaleDateString('fr-FR', { weekday: 'short' })}
+                      </span>
+                    </div>
+
+                    {/* Carte bouteille à droite */}
+                    <div className="tl-card">
+                      <div className="tl-card-top">
+                        <span className="tl-wine-name">
+                          {e.cru}{e.millesime ? ` ${e.millesime}` : ''}
+                        </span>
+                        <div className="tl-card-right">
+                          <span className="tl-qty">
+                            btl <strong>{e.qte_mouvement}</strong>
+                          </span>
+                          <span className={`entry-tag ${tagClass(e.raison_sortie)}`}>
+                            {tagLabel(e.raison_sortie)}
+                          </span>
+                        </div>
+                      </div>
+                      {(e.raison_sortie || e.origine_mouvement) && (
+                        <div className="tl-context">
+                          {[e.raison_sortie, e.origine_mouvement].filter(Boolean).join(' · ')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </section>
   )
 }
