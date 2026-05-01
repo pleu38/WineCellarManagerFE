@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
-    "@react-three/fiber": "^9.6.1",
+    "@react-three/fiber": "^8.18.0",
     "lucide-react": "^1.14.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-is": "^19.2.5",
     "recharts": "^3.8.1",
-    "three": "^0.184.0"
+    "three": "^0.168.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
