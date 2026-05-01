@@ -571,7 +571,322 @@ h1 em {
   font-weight: 500;
 }
 
-/* AJOUT */
+/* AJOUT — wizard stepper */
+.wz-success {
+  background: #e8f3ea;
+  border: 1px solid rgba(74, 143, 86, 0.3);
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  color: #2d6638;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wz-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 32px;
+  padding: 24px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.wz-stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.wz-line {
+  position: absolute;
+  top: 20px;
+  right: calc(50% + 20px);
+  width: calc(100% - 40px);
+  height: 2px;
+  background: var(--bg-soft);
+  transform: translateX(-50%);
+  left: -50%;
+  right: auto;
+}
+
+/* Redraw: lines are siblings, placed between circles */
+.wz-stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.wz-stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+}
+
+.wz-line {
+  position: absolute;
+  top: 19px;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--bg-soft);
+  z-index: 0;
+}
+
+.wz-line.filled {
+  background: var(--bordeaux);
+}
+
+.wz-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: all 0.25s ease;
+}
+
+.wz-circle.active {
+  background: var(--bordeaux);
+  border-color: var(--bordeaux);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--bordeaux-glow);
+}
+
+.wz-circle.done {
+  background: var(--bordeaux-soft);
+  border-color: var(--bordeaux);
+  color: var(--bordeaux);
+}
+
+.wz-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.wz-label.active {
+  color: var(--bordeaux);
+  font-weight: 600;
+}
+
+.wz-label.done {
+  color: var(--bordeaux);
+}
+
+/* Layout */
+.wz-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  align-items: start;
+}
+
+.wz-main {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  min-height: 480px;
+}
+
+/* Step content */
+.wz-step {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wz-step-hd {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wz-step-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.wz-step-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wz-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--bordeaux);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.wz-back:hover { color: var(--bordeaux-bright); }
+
+.wz-code-sm {
+  background: var(--bordeaux-soft);
+  color: var(--bordeaux);
+  border: 1px solid rgba(139,21,56,0.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Search */
+.wz-search-wrap {
+  position: relative;
+}
+
+.wz-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.wz-search {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.wz-search:focus {
+  outline: none;
+  border-color: var(--bordeaux);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--bordeaux-glow);
+}
+
+/* List */
+.wz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.wz-list::-webkit-scrollbar { width: 4px; }
+.wz-list::-webkit-scrollbar-track { background: transparent; }
+.wz-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+.wz-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.18s ease;
+}
+
+.wz-item:hover {
+  background: var(--bordeaux-soft);
+  border-color: var(--bordeaux);
+}
+
+.wz-code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bordeaux);
+  background: var(--bordeaux-soft);
+  border: 1px solid rgba(139,21,56,0.2);
+  border-radius: 5px;
+  padding: 3px 7px;
+  min-width: 36px;
+  text-align: center;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.wz-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.wz-chevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.18s;
+}
+
+.wz-item:hover .wz-chevron {
+  transform: translateX(3px);
+  color: var(--bordeaux);
+}
+
+.wz-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: 'Geist Mono', monospace;
+}
+
+.wz-skip {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+  font-weight: 500;
+}
+
+.wz-skip:hover { color: var(--bordeaux); }
+
+/* AJOUT — legacy layout (kept) */
 .add-layout {
   display: grid;
   grid-template-columns: 1fr 340px;

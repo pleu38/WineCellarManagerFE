@@ -1,30 +1,270 @@
 import { useState, useEffect } from 'react'
-import { Check, ArrowLeft, RotateCcw } from 'lucide-react'
+import { Check, ArrowLeft, RotateCcw, Globe, MapPin, Landmark, User, Wine, ChevronRight, Search } from 'lucide-react'
 import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine } from '../api/wineApi'
 
+const STEPS = [
+  { id: 'pays',        label: 'Pays',        Icon: Globe },
+  { id: 'region',      label: 'Région',      Icon: MapPin },
+  { id: 'appellation', label: 'Appellation', Icon: Landmark },
+  { id: 'producteur',  label: 'Producteur',  Icon: User },
+  { id: 'details',     label: 'Détails',     Icon: Wine },
+]
+
 const TYPES = [
-  { id: 'Rouge', cls: 'rouge' },
-  { id: 'Blanc', cls: 'blanc' },
-  { id: 'Rosé', cls: 'rose' },
-  { id: 'Bulles', cls: 'bulles' },
+  { id: 'Rouge',   cls: 'rouge' },
+  { id: 'Blanc',   cls: 'blanc' },
+  { id: 'Rosé',    cls: 'rose' },
+  { id: 'Bulles',  cls: 'bulles' },
   { id: 'Liqueur', cls: 'liqueur' },
 ]
 
 const EMPTY = {
-  type: 'Rouge',
-  cru: '',
-  millesime: '',
-  producteur: '',
-  appellation: '',
-  region: '',
-  pays: '',
-  quantite: '6',
-  apoStart: '',
-  apoEnd: '',
-  notes: '',
+  type: 'Rouge', cru: '', millesime: '', producteur: '',
+  appellation: '', region: '', pays: '', pays_code: '',
+  quantite: '6', apoStart: '', apoEnd: '', notes: '',
 }
 
+/* ── Step sub-components ─────────────────────────────────── */
+
+function StepPays({ list, onSelect }) {
+  const [q, setQ] = useState('')
+  const filtered = list.filter((p) =>
+    p.pays.toLowerCase().includes(q.toLowerCase()) ||
+    (p.code ?? '').toLowerCase().includes(q.toLowerCase())
+  )
+  return (
+    <div className="wz-step">
+      <div className="wz-step-hd">
+        <div className="wz-step-title">Sélectionnez un pays</div>
+        <div className="wz-step-sub">Pays d'origine du vin</div>
+      </div>
+      <div className="wz-search-wrap">
+        <Search size={14} className="wz-search-icon" />
+        <input
+          className="wz-search"
+          placeholder="Rechercher un pays…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="wz-list">
+        {filtered.map((p) => (
+          <button key={p.pays} className="wz-item" onClick={() => onSelect(p)}>
+            <span className="wz-code">{p.code ?? '—'}</span>
+            <span className="wz-name">{p.pays}</span>
+            <ChevronRight size={14} className="wz-chevron" />
+          </button>
+        ))}
+        {filtered.length === 0 && (
+          <div className="wz-empty">Aucun pays trouvé</div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StepRegion({ list, pays, paysCode, onSelect, onBack }) {
+  const [q, setQ] = useState('')
+  const filtered = list.filter((r) => r.region.toLowerCase().includes(q.toLowerCase()))
+  return (
+    <div className="wz-step">
+      <div className="wz-step-hd">
+        <button className="wz-back" onClick={onBack}>
+          <ArrowLeft size={14} /> {pays}
+          {paysCode && <span className="wz-code-sm">{paysCode}</span>}
+        </button>
+        <div className="wz-step-title">Sélectionnez une région</div>
+        <div className="wz-step-sub">Région viticole en {pays}</div>
+      </div>
+      <div className="wz-search-wrap">
+        <Search size={14} className="wz-search-icon" />
+        <input
+          className="wz-search"
+          placeholder="Rechercher une région…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="wz-list">
+        {filtered.map((r) => (
+          <button key={r.region} className="wz-item" onClick={() => onSelect(r)}>
+            <span className="wz-name">{r.region}</span>
+            <ChevronRight size={14} className="wz-chevron" />
+          </button>
+        ))}
+        {filtered.length === 0 && <div className="wz-empty">Aucune région trouvée</div>}
+      </div>
+    </div>
+  )
+}
+
+function StepAppellation({ list, region, onSelect, onBack }) {
+  const [q, setQ] = useState('')
+  const filtered = list.filter((a) =>
+    (a.appellation ?? a.nom ?? '').toLowerCase().includes(q.toLowerCase())
+  )
+  return (
+    <div className="wz-step">
+      <div className="wz-step-hd">
+        <button className="wz-back" onClick={onBack}>
+          <ArrowLeft size={14} /> {region}
+        </button>
+        <div className="wz-step-title">Sélectionnez une appellation</div>
+        <div className="wz-step-sub">AOP / IGP de la région {region}</div>
+      </div>
+      <div className="wz-search-wrap">
+        <Search size={14} className="wz-search-icon" />
+        <input
+          className="wz-search"
+          placeholder="Rechercher une appellation…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="wz-list">
+        {filtered.map((a) => {
+          const name = a.appellation ?? a.nom ?? ''
+          return (
+            <button key={name} className="wz-item" onClick={() => onSelect(a)}>
+              <span className="wz-name">{name}</span>
+              <ChevronRight size={14} className="wz-chevron" />
+            </button>
+          )
+        })}
+        {filtered.length === 0 && <div className="wz-empty">Aucune appellation trouvée</div>}
+      </div>
+    </div>
+  )
+}
+
+function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
+  const [q, setQ] = useState('')
+  const filtered = list.filter((p) =>
+    (p.producteur ?? p.nom ?? '').toLowerCase().includes(q.toLowerCase())
+  )
+  return (
+    <div className="wz-step">
+      <div className="wz-step-hd">
+        <button className="wz-back" onClick={onBack}>
+          <ArrowLeft size={14} /> {appellation}
+        </button>
+        <div className="wz-step-title">Sélectionnez un producteur</div>
+        <div className="wz-step-sub">Domaine ou négociant</div>
+      </div>
+      <div className="wz-search-wrap">
+        <Search size={14} className="wz-search-icon" />
+        <input
+          className="wz-search"
+          placeholder="Rechercher un producteur…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="wz-list">
+        {filtered.map((p) => {
+          const name = p.producteur ?? p.nom ?? ''
+          return (
+            <button key={name} className="wz-item" onClick={() => onSelect(p)}>
+              <span className="wz-name">{name}</span>
+              <ChevronRight size={14} className="wz-chevron" />
+            </button>
+          )
+        })}
+        {filtered.length === 0 && <div className="wz-empty">Aucun producteur trouvé</div>}
+      </div>
+      <button className="wz-skip" onClick={onSkip}>
+        Saisir manuellement →
+      </button>
+    </div>
+  )
+}
+
+function StepDetails({ form, setForm, onSubmit, submitting }) {
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  return (
+    <div className="wz-step">
+      <div className="wz-step-hd">
+        <div className="wz-step-title">Détails du vin</div>
+        <div className="wz-step-sub">Informations finales</div>
+      </div>
+      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="field">
+          <label>Type de vin</label>
+          <div className="type-selector">
+            {TYPES.map((t) => (
+              <div
+                key={t.id}
+                className={`type-option${form.type === t.id ? ' selected' : ''}`}
+                onClick={() => setForm((f) => ({ ...f, type: t.id }))}
+              >
+                <div className={`type-color ${t.cls}`} />
+                <div className="type-label">{t.id}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="field">
+            <label>Cuvée / Cru</label>
+            <input type="text" placeholder="Ex. Les Charmes" value={form.cru} onChange={set('cru')} />
+          </div>
+          <div className="field">
+            <label>Millésime</label>
+            <input type="number" placeholder="2019" value={form.millesime} onChange={set('millesime')} />
+          </div>
+        </div>
+
+        {!form.producteur && (
+          <div className="field">
+            <label>Producteur / Domaine</label>
+            <input type="text" placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
+          </div>
+        )}
+
+        <div className="form-row">
+          <div className="field">
+            <label>Quantité</label>
+            <input type="number" placeholder="6" min="1" value={form.quantite} onChange={set('quantite')} />
+          </div>
+          <div className="field">
+            <label>Apogée — début</label>
+            <input type="number" placeholder="2026" value={form.apoStart} onChange={set('apoStart')} />
+          </div>
+          <div className="field">
+            <label>Apogée — fin</label>
+            <input type="number" placeholder="2035" value={form.apoEnd} onChange={set('apoEnd')} />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Notes de dégustation</label>
+          <textarea
+            placeholder="Robe rubis profond, nez de fruits noirs…"
+            value={form.notes}
+            onChange={set('notes')}
+          />
+        </div>
+
+        <div className="form-actions" style={{ paddingTop: 0, marginTop: 0, borderTop: 'none' }}>
+          <button className="btn" type="submit" disabled={submitting}>
+            <Check className="btn-icon" />
+            {submitting ? 'Inscription…' : 'Inscrire au registre'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+/* ── Main component ──────────────────────────────────────── */
+
 export default function Ajout({ navigate }) {
+  const [step, setStep] = useState(0)
   const [form, setForm] = useState(EMPTY)
   const [paysList, setPaysList] = useState([])
   const [regionsList, setRegionsList] = useState([])
@@ -33,29 +273,43 @@ export default function Ajout({ navigate }) {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  useEffect(() => {
-    getPays().catch(() => []).then(setPaysList)
-  }, [])
+  useEffect(() => { getPays().catch(() => []).then(setPaysList) }, [])
 
   useEffect(() => {
     if (!form.pays) { setRegionsList([]); return }
     getRegionsByPays(form.pays).catch(() => []).then(setRegionsList)
-    setForm((f) => ({ ...f, region: '', appellation: '', producteur: '' }))
   }, [form.pays])
 
   useEffect(() => {
     if (!form.region) { setAppellationsList([]); return }
     getAppellationsByRegion(form.region).catch(() => []).then(setAppellationsList)
-    setForm((f) => ({ ...f, appellation: '', producteur: '' }))
   }, [form.region])
 
   useEffect(() => {
     if (!form.appellation) { setProducteursList([]); return }
     getProducteursByAppellation(form.appellation).catch(() => []).then(setProducteursList)
-    setForm((f) => ({ ...f, producteur: '' }))
   }, [form.appellation])
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const selectPays = (p) => {
+    setForm((f) => ({ ...f, pays: p.pays, pays_code: p.code ?? '', region: '', appellation: '', producteur: '' }))
+    setStep(1)
+  }
+
+  const selectRegion = (r) => {
+    setForm((f) => ({ ...f, region: r.region, appellation: '', producteur: '' }))
+    setStep(2)
+  }
+
+  const selectAppellation = (a) => {
+    const name = a.appellation ?? a.nom ?? ''
+    setForm((f) => ({ ...f, appellation: name, producteur: '' }))
+    setStep(3)
+  }
+
+  const selectProducteur = (p) => {
+    setForm((f) => ({ ...f, producteur: p.producteur ?? p.nom ?? '' }))
+    setStep(4)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -71,7 +325,8 @@ export default function Ajout({ navigate }) {
       })
       setSuccess(true)
       setForm(EMPTY)
-      setTimeout(() => setSuccess(false), 3000)
+      setStep(0)
+      setTimeout(() => setSuccess(false), 4000)
     } catch {
       // keep form as-is on error
     } finally {
@@ -79,12 +334,17 @@ export default function Ajout({ navigate }) {
     }
   }
 
+  const reset = () => {
+    setForm(EMPTY)
+    setStep(0)
+  }
+
   const preview = {
     name: form.cru || 'Nouveau cru',
     year: form.millesime || '— —',
-    domain: form.producteur || 'Saisie en cours…',
+    domain: form.producteur || form.appellation || 'Saisie en cours…',
     qty: (form.quantite || '0') + ' btl',
-    region: form.region || '—',
+    region: form.region || form.pays || '—',
     apo: form.apoStart && form.apoEnd ? `${form.apoStart} — ${form.apoEnd}` : 'À définir',
   }
 
@@ -95,184 +355,91 @@ export default function Ajout({ navigate }) {
           <h1>Inscrire <em>un vin</em></h1>
           <div className="subtitle">Ajoutez un nouveau cru à votre cave personnelle.</div>
         </div>
-        <button className="btn ghost" onClick={() => navigate('accueil')}>
-          <ArrowLeft className="btn-icon" />
-          Retour
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn ghost" type="button" onClick={reset}>
+            <RotateCcw className="btn-icon" />
+            Réinitialiser
+          </button>
+          <button className="btn ghost" onClick={() => navigate('accueil')}>
+            <ArrowLeft className="btn-icon" />
+            Retour
+          </button>
+        </div>
       </div>
 
       {success && (
-        <div
-          style={{
-            background: '#e8f3ea',
-            border: '1px solid rgba(74,143,86,0.3)',
-            borderRadius: 10,
-            padding: '14px 20px',
-            marginBottom: 24,
-            color: '#2d6638',
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: 13,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
+        <div className="wz-success">
           <Check size={16} />
           Vin inscrit avec succès dans votre cave !
         </div>
       )}
 
-      <form className="add-layout" onSubmit={handleSubmit}>
-        <div className="form-card">
-          <div className="form-section">
-            <div className="form-section-title">
-              <span className="form-section-num">1</span>Identification
+      {/* Stepper */}
+      <div className="wz-stepper">
+        {STEPS.map((s, i) => {
+          const done = i < step
+          const active = i === step
+          const { Icon } = s
+          return (
+            <div key={s.id} className="wz-stepper-item">
+              {i > 0 && <div className={`wz-line${i <= step ? ' filled' : ''}`} />}
+              <button
+                className={`wz-circle${active ? ' active' : done ? ' done' : ''}`}
+                onClick={() => done ? setStep(i) : undefined}
+                style={{ cursor: done ? 'pointer' : 'default' }}
+              >
+                {done ? <Check size={15} /> : <Icon size={15} />}
+              </button>
+              <span className={`wz-label${active ? ' active' : done ? ' done' : ''}`}>{s.label}</span>
             </div>
-            <div className="form-section-desc">Type, nom du cru et millésime.</div>
+          )
+        })}
+      </div>
 
-            <div className="form-row full">
-              <div className="field">
-                <label>Type de vin</label>
-                <div className="type-selector">
-                  {TYPES.map((t) => (
-                    <div
-                      key={t.id}
-                      className={`type-option${form.type === t.id ? ' selected' : ''}`}
-                      onClick={() => setForm((f) => ({ ...f, type: t.id }))}
-                    >
-                      <div className={`type-color ${t.cls}`} />
-                      <div className="type-label">{t.id}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="field">
-                <label>Cuvée / Cru</label>
-                <input type="text" placeholder="Ex. Les Charmes" value={form.cru} onChange={set('cru')} />
-              </div>
-              <div className="field">
-                <label>Millésime</label>
-                <input type="number" placeholder="2019" value={form.millesime} onChange={set('millesime')} />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="field">
-                <label>Producteur / Domaine</label>
-                {producteursList.length > 0 ? (
-                  <select value={form.producteur} onChange={set('producteur')}>
-                    <option value="">Sélectionner…</option>
-                    {producteursList.map((p) => (
-                      <option key={p.producteur} value={p.producteur}>{p.producteur}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input type="text" placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
-                )}
-              </div>
-              <div className="field">
-                <label>Appellation</label>
-                {appellationsList.length > 0 ? (
-                  <select value={form.appellation} onChange={set('appellation')}>
-                    <option value="">Sélectionner…</option>
-                    {appellationsList.map((a) => (
-                      <option key={a.appellation} value={a.appellation}>{a.appellation}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input type="text" placeholder="Ex. Meursault 1er Cru" value={form.appellation} onChange={set('appellation')} />
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <div className="form-section-title">
-              <span className="form-section-num">2</span>Provenance &amp; quantité
-            </div>
-            <div className="form-section-desc">Pays, région, et stock.</div>
-
-            <div className="form-row three">
-              <div className="field">
-                <label>Pays</label>
-                {paysList.length > 0 ? (
-                  <select value={form.pays} onChange={set('pays')}>
-                    <option value="">Sélectionner…</option>
-                    {paysList.map((p) => (
-                      <option key={p.pays} value={p.pays}>{p.pays}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input type="text" placeholder="France" value={form.pays} onChange={set('pays')} />
-                )}
-              </div>
-              <div className="field">
-                <label>Région</label>
-                {regionsList.length > 0 ? (
-                  <select value={form.region} onChange={set('region')}>
-                    <option value="">Sélectionner…</option>
-                    {regionsList.map((r) => (
-                      <option key={r.region} value={r.region}>{r.region}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input type="text" placeholder="Ex. Bourgogne" value={form.region} onChange={set('region')} />
-                )}
-              </div>
-              <div className="field">
-                <label>Quantité</label>
-                <input type="number" placeholder="6" min="1" value={form.quantite} onChange={set('quantite')} />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="field">
-                <label>Apogée — début</label>
-                <input type="number" placeholder="2026" value={form.apoStart} onChange={set('apoStart')} />
-              </div>
-              <div className="field">
-                <label>Apogée — fin</label>
-                <input type="number" placeholder="2035" value={form.apoEnd} onChange={set('apoEnd')} />
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <div className="form-section-title">
-              <span className="form-section-num">3</span>Notes de dégustation
-            </div>
-            <div className="form-section-desc">Optionnel — votre ressenti et accords.</div>
-
-            <div className="form-row full">
-              <div className="field">
-                <label>Commentaires</label>
-                <textarea
-                  placeholder="Robe rubis profond, nez de fruits noirs et d'épices douces…"
-                  value={form.notes}
-                  onChange={set('notes')}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button className="btn" type="submit" disabled={submitting}>
-              <Check className="btn-icon" />
-              {submitting ? 'Inscription…' : 'Inscrire au registre'}
-            </button>
-            <button className="btn ghost" type="button" onClick={() => setForm(EMPTY)}>
-              <RotateCcw className="btn-icon" />
-              Réinitialiser
-            </button>
-          </div>
+      {/* Content */}
+      <div className="wz-layout">
+        <div className="wz-main">
+          {step === 0 && (
+            <StepPays list={paysList} onSelect={selectPays} />
+          )}
+          {step === 1 && (
+            <StepRegion
+              list={regionsList}
+              pays={form.pays}
+              paysCode={form.pays_code}
+              onSelect={selectRegion}
+              onBack={() => setStep(0)}
+            />
+          )}
+          {step === 2 && (
+            <StepAppellation
+              list={appellationsList}
+              region={form.region}
+              onSelect={selectAppellation}
+              onBack={() => setStep(1)}
+            />
+          )}
+          {step === 3 && (
+            <StepProducteur
+              list={producteursList}
+              appellation={form.appellation}
+              onSelect={selectProducteur}
+              onBack={() => setStep(2)}
+              onSkip={() => setStep(4)}
+            />
+          )}
+          {step === 4 && (
+            <StepDetails
+              form={form}
+              setForm={setForm}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+            />
+          )}
         </div>
 
-        <div className="preview-card">
+        <div className="preview-card" style={{ alignSelf: 'start' }}>
           <div className="preview-label">Aperçu en direct</div>
-
           <div className="bottle-mockup">
             <div className="bottle-label">
               <div className="bottle-label-text">
@@ -281,10 +448,8 @@ export default function Ajout({ navigate }) {
               <div className="bottle-label-year">{preview.year}</div>
             </div>
           </div>
-
           <div className="preview-name">{preview.name}</div>
           <div className="preview-domain">{preview.domain}</div>
-
           <div className="preview-grid">
             <div className="preview-stat">
               <div className="preview-stat-label">Quantité</div>
@@ -304,7 +469,7 @@ export default function Ajout({ navigate }) {
             </div>
           </div>
         </div>
-      </form>
+      </div>
     </section>
   )
 }
