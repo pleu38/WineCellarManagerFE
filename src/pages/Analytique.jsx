@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Package, TrendingUp, Wine, BarChart3 } from 'lucide-react'
+import { MapPin, TrendingUp, Wine, BarChart3 } from 'lucide-react'
 import {
   ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
@@ -30,8 +30,13 @@ const REGION_COLORS = [
 
 function normalizeCouleur(raw) {
   if (!raw) return []
-  if (Array.isArray(raw)) return raw
-  return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite }))
+  if (Array.isArray(raw)) {
+    return raw.map((item) => ({
+      type_vin: item.type_vin ?? item.categorie ?? item.couleur ?? item.name ?? String(Object.keys(item)[0]),
+      quantite: Number(item.quantite ?? item.count ?? item.value ?? Object.values(item).find((v) => typeof v === 'number') ?? 0),
+    })).filter((c) => c.type_vin)
+  }
+  return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite: Number(quantite) }))
 }
 
 const tooltipStyle = {
@@ -61,14 +66,14 @@ export default function Analytique() {
       getAnalyticsByCouleur(),
     ]).then(([sum, sumR, regions, millesimes, avg, couleur]) => {
       if (sum.status === 'fulfilled' && sum.value?.[0]?.somme != null)
-        setTotalBottles(Math.round(sum.value[0].somme))
+        setTotalBottles(sum.value[0].somme)
       if (sumR.status === 'fulfilled' && sumR.value?.[0]?.compte_region != null)
         setTotalRegions(sumR.value[0].compte_region)
       if (regions.status === 'fulfilled') setRegionData(regions.value)
       if (millesimes.status === 'fulfilled')
         setMillesimeData(millesimes.value.sort((a, b) => a.millesime - b.millesime))
       if (avg.status === 'fulfilled' && avg.value?.[0]?.moyenne != null)
-        setAverage(Math.round(avg.value[0].moyenne * 10) / 10)
+        setAverage(avg.value[0].moyenne)
       if (couleur.status === 'fulfilled')
         setCouleurData(normalizeCouleur(couleur.value))
       setLoading(false)
@@ -77,7 +82,7 @@ export default function Analytique() {
 
   const colorChartData = couleurData.map((c) => ({
     name: c.type_vin,
-    value: c.quantite || 0,
+    value: c.quantite,
     color: COULEUR_CONFIG[c.type_vin]?.color ?? '#9d8e87',
   }))
 
@@ -106,39 +111,48 @@ export default function Analytique() {
         </div>
       </div>
 
-      {/* KPI row */}
-      <div className="an-kpi-row">
-        <div className="an-kpi-card">
-          <div className="an-kpi-icon"><MapPin size={28} /></div>
-          <div>
-            <div className="an-kpi-value">{totalRegions ?? '—'}</div>
-            <div className="an-kpi-label">Régions différentes</div>
+      {/* Feature card + 2 stat cards */}
+      <div className="analytics-grid" style={{ marginBottom: 16 }}>
+        <div className="stat-card feature">
+          <div className="stat-card-top">
+            <div className="stat-label">Inventaire total</div>
+            <div className="stat-icon"><Wine size={12} /></div>
+          </div>
+          <div className="stat-value">
+            {totalBottles ?? '—'}<span className="stat-unit">vins différents</span>
+          </div>
+          <div className="stat-trend" style={{ color: 'rgba(255,220,230,0.9)' }}>
+            {totalRegions ? `${totalRegions} régions représentées` : ''}
           </div>
         </div>
-        <div className="an-kpi-card">
-          <div className="an-kpi-icon"><Package size={28} /></div>
-          <div>
-            <div className="an-kpi-value">{totalBottles ?? '—'}</div>
-            <div className="an-kpi-label">Vins différents</div>
+
+        <div className="stat-card">
+          <div className="stat-card-top">
+            <div className="stat-label">Régions</div>
+            <div className="stat-icon"><MapPin size={12} /></div>
           </div>
+          <div className="stat-value">{totalRegions ?? '—'}</div>
+          <div className="stat-trend">Dans la cave</div>
         </div>
-        <div className="an-kpi-card">
-          <div className="an-kpi-icon"><TrendingUp size={28} /></div>
-          <div>
-            <div className="an-kpi-value">{average ?? '—'}</div>
-            <div className="an-kpi-label">Bouteilles / vin</div>
+
+        <div className="stat-card">
+          <div className="stat-card-top">
+            <div className="stat-label">Moy. par cru</div>
+            <div className="stat-icon"><TrendingUp size={12} /></div>
           </div>
+          <div className="stat-value">{average ?? '—'}</div>
+          <div className="stat-trend warn">Bouteilles / cru</div>
         </div>
       </div>
 
-      {/* Color cards row */}
+      {/* Color cards */}
       <div className="an-cards-row">
         <div className="an-card">
           <div className="an-card-hdr">
             <span className="an-card-title">Bouteilles totales</span>
             <Wine size={16} color="#9d8e87" />
           </div>
-          <div className="an-card-value">{totalCouleur || totalBottles || '—'}</div>
+          <div className="an-card-value">{totalBottles ?? '—'}</div>
           <div className="an-card-sub">Dans toute la collection</div>
         </div>
         {colorChartData.map(({ name, value, color }) => (
@@ -155,10 +169,9 @@ export default function Analytique() {
         ))}
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="an-chart-row">
-        {/* Color donut */}
-        {colorChartData.length > 0 && (
+        {colorChartData.length > 0 ? (
           <div className="an-chart-panel">
             <div className="an-chart-title">Répartition par couleur</div>
             <div className="an-chart-desc">Distribution des vins par type</div>
@@ -169,9 +182,7 @@ export default function Analytique() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name} (${(percent * 100).toFixed(0)}%)`
-                  }
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                   outerRadius={100}
                   innerRadius={62}
                   cornerRadius={6}
@@ -190,9 +201,12 @@ export default function Analytique() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        ) : (
+          <div className="an-chart-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9d8e87', fontSize: 14 }}>
+            Aucune donnée de couleur disponible
+          </div>
         )}
 
-        {/* Region horizontal bar chart (replaces donut) */}
         {regionSorted.length > 0 && (
           <div className="an-chart-panel">
             <div className="an-chart-title">Par région</div>
@@ -234,7 +248,7 @@ export default function Analytique() {
         )}
       </div>
 
-      {/* Millesime bar chart — full width */}
+      {/* Millesime chart */}
       {millesimeData.length > 0 && (
         <div className="an-chart-panel" style={{ marginTop: 16 }}>
           <div className="an-chart-title">Par millésime</div>
