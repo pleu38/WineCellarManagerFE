@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Search, X } from 'lucide-react'
-import { getAllWine, getQuantityByWine, updateWine } from '../api/wineApi'
+import { getAllWine, getQuantityByWine, getLocationByCru, updateWine } from '../api/wineApi'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
 
@@ -33,17 +33,23 @@ function WineModal({ wine, onClose }) {
   const [reasons, setReasons] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState({})
+  const [locations, setLocations] = useState([])
+  const [showLocation, setShowLocation] = useState(false)
 
   useEffect(() => {
-    getQuantityByWine(wine.cru)
-      .then((data) => {
-        setRows(data)
+    Promise.allSettled([
+      getQuantityByWine(wine.cru),
+      getLocationByCru(wine.cru),
+    ]).then(([qty, loc]) => {
+      if (qty.status === 'fulfilled') {
+        setRows(qty.value)
         const init = {}
-        data.forEach((r) => { init[r.BID] = r.quantite })
+        qty.value.forEach((r) => { init[r.BID] = r.quantite })
         setQuantities(init)
-      })
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false))
+      }
+      if (loc.status === 'fulfilled') setLocations(loc.value)
+      setLoading(false)
+    })
   }, [wine.cru])
 
   const handleSave = async (row) => {
@@ -141,13 +147,44 @@ function WineModal({ wine, onClose }) {
                       </div>
                     )}
 
-                    <div className="modal-extra-btns">
-                      <button className="btn ghost">📍 Localisation</button>
-                      <button className="btn ghost">🧊 Voir en 3D</button>
-                    </div>
                   </div>
                 )
               })}
+
+              <div className="modal-extra-btns">
+                <button
+                  className={`btn ghost${showLocation ? ' active-ghost' : ''}`}
+                  onClick={() => setShowLocation((v) => !v)}
+                >
+                  📍 Localisation
+                </button>
+                <button className="btn ghost">🧊 Voir en 3D</button>
+              </div>
+
+              {showLocation && (
+                <div className="modal-location">
+                  {locations.length === 0 ? (
+                    <div className="modal-location-empty">Aucune localisation enregistrée</div>
+                  ) : (
+                    locations.map((loc, i) => (
+                      <div className="modal-location-row" key={i}>
+                        <div className="modal-location-item">
+                          <span className="modal-location-label">Clayette</span>
+                          <span className="modal-location-value">{loc.clayette ?? '—'}</span>
+                        </div>
+                        <div className="modal-location-item">
+                          <span className="modal-location-label">Rangée</span>
+                          <span className="modal-location-value">{loc.rangee ?? '—'}</span>
+                        </div>
+                        <div className="modal-location-item">
+                          <span className="modal-location-label">Position</span>
+                          <span className="modal-location-value">{loc.index_id ?? '—'}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
