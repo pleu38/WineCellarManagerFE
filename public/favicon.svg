@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Cork -->
+  <rect x="13" y="2" width="6" height="3" rx="1.5" fill="#5e0e26"/>
+  <!-- Neck -->
+  <rect x="13" y="5" width="6" height="5" fill="#8b1538"/>
+  <!-- Shoulder + body -->
+  <path d="M13 10 Q8 12 8 16 L8 28 Q8 30 16 30 Q24 30 24 28 L24 16 Q24 12 19 10 Z" fill="#8b1538"/>
+  <!-- Label -->
+  <rect x="10" y="18" width="12" height="8" rx="2" fill="#f5e0e6" opacity="0.5"/>
+</svg>

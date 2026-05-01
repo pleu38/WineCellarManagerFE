@@ -2488,3 +2488,85 @@ h1 em {
   border-top: 1px solid var(--border);
 }
 .modal-extra-btns .btn { flex: 1; justify-content: center; font-size: 12px; }
+
+.btn.ghost.active-ghost {
+  background: var(--bordeaux-soft);
+  border-color: var(--bordeaux);
+  color: var(--bordeaux);
+}
+
+.modal-location {
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.modal-location-empty {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+}
+
+.modal-location-row {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-location-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.modal-location-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-location-value {
+  font-family: 'Geist Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--bordeaux);
+}
+
+.modal-loc-fields {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-loc-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.loc-input {
+  width: 100%;
+  padding: 10px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--bg-card);
+  font-family: 'Geist Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bordeaux);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.loc-input:focus { border-color: var(--bordeaux); }

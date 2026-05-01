@@ -21,6 +21,7 @@ export const getWineByRobe = (robe) => request(`/wine/robe/${encodeURIComponent(
 export const getWineByCru = (cru) => request(`/wine/cru/${encodeURIComponent(cru)}`)
 export const getWineByMillesime = (millesime) => request(`/wine/millesime/${millesime}`)
 export const getQuantityByWine = (cru) => request(`/wine/${encodeURIComponent(cru)}/quantity`)
+export const getLocationByCru = (cru) => request(`/wine/${encodeURIComponent(cru)}/cru`)
 export const getBottleHistory = () => request('/wine/history')
 export const addWineLocation = (cru, data) =>
   request(`/wine/${encodeURIComponent(cru)}/location`, { method: 'POST', body: JSON.stringify(data) })

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Search, X } from 'lucide-react'
-import { getAllWine, getQuantityByWine, updateWine } from '../api/wineApi'
+import { getAllWine, getQuantityByWine, getLocationByCru, updateWine, addWineLocation } from '../api/wineApi'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
 
@@ -33,17 +33,26 @@ function WineModal({ wine, onClose }) {
   const [reasons, setReasons] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState({})
+  const [locations, setLocations] = useState([])
+  const [showLocation, setShowLocation] = useState(false)
+  const [editingLocation, setEditingLocation] = useState(false)
+  const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '' })
+  const [savingLoc, setSavingLoc] = useState(false)
 
   useEffect(() => {
-    getQuantityByWine(wine.cru)
-      .then((data) => {
-        setRows(data)
+    Promise.allSettled([
+      getQuantityByWine(wine.cru),
+      getLocationByCru(wine.cru),
+    ]).then(([qty, loc]) => {
+      if (qty.status === 'fulfilled') {
+        setRows(qty.value)
         const init = {}
-        data.forEach((r) => { init[r.BID] = r.quantite })
+        qty.value.forEach((r) => { init[r.BID] = r.quantite })
         setQuantities(init)
-      })
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false))
+      }
+      if (loc.status === 'fulfilled') setLocations(loc.value)
+      setLoading(false)
+    })
   }, [wine.cru])
 
   const handleSave = async (row) => {
@@ -141,13 +150,113 @@ function WineModal({ wine, onClose }) {
                       </div>
                     )}
 
-                    <div className="modal-extra-btns">
-                      <button className="btn ghost">📍 Localisation</button>
-                      <button className="btn ghost">🧊 Voir en 3D</button>
-                    </div>
                   </div>
                 )
               })}
+
+              <div className="modal-extra-btns">
+                <button
+                  className={`btn ghost${showLocation ? ' active-ghost' : ''}`}
+                  onClick={() => setShowLocation((v) => !v)}
+                >
+                  📍 Localisation
+                </button>
+                <button className="btn ghost">🧊 Voir en 3D</button>
+              </div>
+
+              {showLocation && (
+                <div className="modal-location">
+                  {!editingLocation ? (
+                    <>
+                      {locations.length === 0 ? (
+                        <div className="modal-location-empty">Aucune localisation enregistrée</div>
+                      ) : (
+                        locations.map((loc, i) => (
+                          <div className="modal-location-row" key={i}>
+                            <div className="modal-location-item">
+                              <span className="modal-location-label">Clayette</span>
+                              <span className="modal-location-value">{loc.clayette ?? '—'}</span>
+                            </div>
+                            <div className="modal-location-item">
+                              <span className="modal-location-label">Rangée</span>
+                              <span className="modal-location-value">{loc.rangee ?? '—'}</span>
+                            </div>
+                            <div className="modal-location-item">
+                              <span className="modal-location-label">Position</span>
+                              <span className="modal-location-value">{loc.index_id ?? '—'}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      <button
+                        className="btn ghost"
+                        style={{ marginTop: 12, width: '100%' }}
+                        onClick={() => {
+                          const first = locations[0]
+                          setLocForm({
+                            clayette: first?.clayette ?? '',
+                            rangee: first?.rangee ?? '',
+                            index_id: first?.index_id ?? '',
+                          })
+                          setEditingLocation(true)
+                        }}
+                      >
+                        ✏️ Modifier la localisation
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="modal-loc-fields">
+                        {[
+                          { key: 'clayette', label: 'Clayette' },
+                          { key: 'rangee',   label: 'Rangée' },
+                          { key: 'index_id', label: 'Position' },
+                        ].map(({ key, label }) => (
+                          <div className="modal-loc-field" key={key}>
+                            <span className="modal-location-label">{label}</span>
+                            <input
+                              type="number"
+                              className="loc-input"
+                              value={locForm[key]}
+                              onChange={(e) => setLocForm((f) => ({ ...f, [key]: e.target.value }))}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="modal-action-row" style={{ marginTop: 14 }}>
+                        <button
+                          className="btn"
+                          disabled={savingLoc}
+                          onClick={async () => {
+                            setSavingLoc(true)
+                            try {
+                              await addWineLocation(wine.cru, {
+                                clayette: Number(locForm.clayette),
+                                rangee: Number(locForm.rangee),
+                                index_id: Number(locForm.index_id),
+                              })
+                              setLocations([{ ...locForm, cru: wine.cru }])
+                              setEditingLocation(false)
+                            } catch {
+                              // keep form open on error
+                            } finally {
+                              setSavingLoc(false)
+                            }
+                          }}
+                        >
+                          {savingLoc ? 'Enregistrement…' : 'Enregistrer'}
+                        </button>
+                        <button
+                          className="btn ghost"
+                          onClick={() => setEditingLocation(false)}
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
