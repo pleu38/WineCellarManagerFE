@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { MapPin, TrendingUp, Wine, BarChart3 } from 'lucide-react'
+import { MapPinned, TrendingUp, Wine, BarChart3 } from 'lucide-react'
 import {
   ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList,
   PieChart, Pie,
 } from 'recharts'
 import {
@@ -140,7 +140,7 @@ export default function Analytique() {
         <div className="stat-card">
           <div className="stat-card-top">
             <div className="stat-label">Régions</div>
-            <div className="stat-icon"><MapPin size={12} /></div>
+            <div className="stat-icon"><MapPinned size={12} /></div>
           </div>
           <div className="stat-value">{totalRegions ?? '—'}</div>
           <div className="stat-trend">Dans la cave</div>
@@ -194,10 +194,10 @@ export default function Analytique() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                  outerRadius={100}
-                  innerRadius={62}
-                  cornerRadius={6}
-                  paddingAngle={4}
+                  outerRadius={110}
+                  innerRadius={68}
+                  cornerRadius={10}
+                  paddingAngle={6}
                   dataKey="value"
                   strokeWidth={0}
                 >
@@ -264,8 +264,14 @@ export default function Analytique() {
         <div className="an-chart-panel" style={{ marginTop: 16 }}>
           <div className="an-chart-title">Par millésime</div>
           <div className="an-chart-desc">Quantité de bouteilles par année</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={millesimeData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={millesimeData} margin={{ top: 24, right: 8, left: -20, bottom: 0 }} barCategoryGap="28%">
+              <defs>
+                <linearGradient id="millesimeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#b91c4a" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#8b1538" stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3ede6" />
               <XAxis
                 dataKey="millesime"
@@ -283,7 +289,13 @@ export default function Analytique() {
                 formatter={(v) => [`${v} btl`, 'Quantité']}
                 cursor={{ fill: 'rgba(139,21,56,0.04)' }}
               />
-              <Bar dataKey="quantite" fill="#8b1538" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="quantite" fill="url(#millesimeGrad)" radius={[6, 6, 0, 0]}>
+                <LabelList
+                  dataKey="quantite"
+                  position="top"
+                  style={{ fontSize: 10, fill: '#9d8e87', fontFamily: 'Geist Mono' }}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

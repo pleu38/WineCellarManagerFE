@@ -1111,6 +1111,7 @@ h1 em {
 .an-card-value {
   font-family: 'Instrument Serif', serif;
   font-size: 34px;
+  font-weight: 700;
   line-height: 1;
   color: var(--text);
   margin-bottom: 4px;
