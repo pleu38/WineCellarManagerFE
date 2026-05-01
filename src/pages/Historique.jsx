@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Download } from 'lucide-react'
 import { getBottleHistory } from '../api/wineApi'
 
 function tagClass(raison) {
@@ -69,9 +70,7 @@ export default function Historique() {
           <div className="subtitle">{history.length} bouteilles consommées au total</div>
         </div>
         <button className="btn ghost">
-          <svg className="btn-icon" viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
+          <Download className="btn-icon" />
           Exporter
         </button>
       </div>
@@ -114,7 +113,6 @@ export default function Historique() {
         <div className="timeline">
           {grouped.map(([month, entries]) => (
             <div key={month}>
-              {/* Séparateur de mois — losange sur la ligne */}
               <div className="tl-month-sep">
                 <span className="tl-month-label">
                   {month.charAt(0).toUpperCase() + month.slice(1)}
@@ -128,7 +126,6 @@ export default function Historique() {
                 const d = new Date(e.date_mouvement)
                 return (
                   <div className="tl-item" key={i}>
-                    {/* Rond sur la ligne */}
                     <div className="tl-dot">
                       <span className="tl-day-num">
                         {String(d.getDate()).padStart(2, '0')}
@@ -138,7 +135,6 @@ export default function Historique() {
                       </span>
                     </div>
 
-                    {/* Carte bouteille à droite */}
                     <div className="tl-card">
                       <div className="tl-card-top">
                         <span className="tl-wine-name">
