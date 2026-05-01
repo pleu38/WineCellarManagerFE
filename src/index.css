@@ -768,23 +768,16 @@ h1 em {
 
 /* List */
 .wz-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 380px;
-  overflow-y: auto;
-  padding-right: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
-
-.wz-list::-webkit-scrollbar { width: 4px; }
-.wz-list::-webkit-scrollbar-track { background: transparent; }
-.wz-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 
 .wz-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 12px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;

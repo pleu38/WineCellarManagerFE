@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react'
-import { Check, ArrowLeft, RotateCcw, Globe, MapPin, Landmark, User, Wine, ChevronRight, Search } from 'lucide-react'
+import { Check, ArrowLeft, RotateCcw, Globe, MapPin, Landmark, User, Wine, Search } from 'lucide-react'
 import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine } from '../api/wineApi'
 
 const STEPS = [
@@ -62,7 +62,6 @@ function StepPays({ list, onSelect }) {
             <button key={p.pays} className="wz-item" onClick={() => onSelect(p)}>
               {code && <span className="wz-code">{code}</span>}
               <span className="wz-name">{p.pays}</span>
-              <ChevronRight size={14} className="wz-chevron" />
             </button>
           )
         })}
@@ -101,7 +100,6 @@ function StepRegion({ list, pays, paysCode, onSelect, onBack }) {
         {filtered.map((r) => (
           <button key={r.region} className="wz-item" onClick={() => onSelect(r)}>
             <span className="wz-name">{r.region}</span>
-            <ChevronRight size={14} className="wz-chevron" />
           </button>
         ))}
         {filtered.length === 0 && <div className="wz-empty">Aucune région trouvée</div>}
@@ -140,7 +138,6 @@ function StepAppellation({ list, region, onSelect, onBack }) {
           return (
             <button key={name} className="wz-item" onClick={() => onSelect(a)}>
               <span className="wz-name">{name}</span>
-              <ChevronRight size={14} className="wz-chevron" />
             </button>
           )
         })}
@@ -180,7 +177,6 @@ function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
           return (
             <button key={name} className="wz-item" onClick={() => onSelect(p)}>
               <span className="wz-name">{name}</span>
-              <ChevronRight size={14} className="wz-chevron" />
             </button>
           )
         })}
