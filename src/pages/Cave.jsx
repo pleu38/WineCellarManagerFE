@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Search, X } from 'lucide-react'
 import { getAllWine, getQuantityByWine, getLocationByCru, updateWine, addWineLocation } from '../api/wineApi'
+import { CaveView3D } from '../components/CaveView3D'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
 
@@ -38,6 +39,7 @@ function WineModal({ wine, onClose }) {
   const [editingLocation, setEditingLocation] = useState(false)
   const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '' })
   const [savingLoc, setSavingLoc] = useState(false)
+  const [show3D, setShow3D] = useState(false)
 
   useEffect(() => {
     Promise.allSettled([
@@ -161,7 +163,10 @@ function WineModal({ wine, onClose }) {
                 >
                   📍 Localisation
                 </button>
-                <button className="btn ghost">🧊 Voir en 3D</button>
+                <button
+                  className={`btn ghost${show3D ? ' active-ghost' : ''}`}
+                  onClick={() => setShow3D((v) => !v)}
+                >🧊 Voir en 3D</button>
               </div>
 
               {showLocation && (
@@ -256,6 +261,10 @@ function WineModal({ wine, onClose }) {
                     </>
                   )}
                 </div>
+              )}
+
+              {show3D && (
+                <CaveView3D quantite={rows.reduce((s, r) => s + (quantities[r.BID] ?? r.quantite), 0)} />
               )}
             </div>
           )}
