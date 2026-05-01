@@ -84,7 +84,7 @@ function WineModal({ wine, onClose }) {
                 const qty = quantities[row.BID] ?? row.quantite
                 const changed = qty !== row.quantite
                 const decreasing = qty < row.quantite
-                const RAISONS = decreasing ? ['Bu', 'Cadeau'] : ['Achat', 'Cadeau']
+                const RAISONS = decreasing ? ['🍷 Bu', '🎁 Cadeau'] : ['🛒 Achat', '🎁 Cadeau']
                 return (
                   <div className="modal-row" key={row.BID}>
                     <div className="modal-row-top">
@@ -224,8 +224,8 @@ export default function Cave({ navigate }) {
             <div
               className="wine-card"
               key={i}
-              style={{ '--card-accent': ACCENT_COLORS[pillClass] }}
-              onClick={() => setModalWine(w)}
+              style={{ '--card-accent': ACCENT_COLORS[pillClass], cursor: pillClass === 'liqueur' ? 'default' : 'pointer' }}
+              onClick={() => pillClass !== 'liqueur' && setModalWine(w)}
             >
               <div className="wine-card-top">
                 <div className={`color-pill ${pillClass}`}>
