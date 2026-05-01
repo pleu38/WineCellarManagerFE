@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { Check, ArrowLeft, RotateCcw, Globe, MapPin, Landmark, User, Wine, ChevronRight, Search } from 'lucide-react'
 import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine } from '../api/wineApi'
 
@@ -26,12 +26,19 @@ const EMPTY = {
 
 /* ── Step sub-components ─────────────────────────────────── */
 
+function getCode(p) {
+  return p.code ?? p.code_pays ?? p.pays_code ?? p.iso ?? p.alpha2 ?? p.alpha_2 ?? ''
+}
+
 function StepPays({ list, onSelect }) {
   const [q, setQ] = useState('')
-  const filtered = list.filter((p) =>
-    p.pays.toLowerCase().includes(q.toLowerCase()) ||
-    (p.code ?? '').toLowerCase().includes(q.toLowerCase())
-  )
+  const filtered = list.filter((p) => {
+    const code = getCode(p)
+    return (
+      p.pays.toLowerCase().includes(q.toLowerCase()) ||
+      code.toLowerCase().includes(q.toLowerCase())
+    )
+  })
   return (
     <div className="wz-step">
       <div className="wz-step-hd">
@@ -49,13 +56,16 @@ function StepPays({ list, onSelect }) {
         />
       </div>
       <div className="wz-list">
-        {filtered.map((p) => (
-          <button key={p.pays} className="wz-item" onClick={() => onSelect(p)}>
-            <span className="wz-code">{p.code ?? '—'}</span>
-            <span className="wz-name">{p.pays}</span>
-            <ChevronRight size={14} className="wz-chevron" />
-          </button>
-        ))}
+        {filtered.map((p) => {
+          const code = getCode(p)
+          return (
+            <button key={p.pays} className="wz-item" onClick={() => onSelect(p)}>
+              {code && <span className="wz-code">{code}</span>}
+              <span className="wz-name">{p.pays}</span>
+              <ChevronRight size={14} className="wz-chevron" />
+            </button>
+          )
+        })}
         {filtered.length === 0 && (
           <div className="wz-empty">Aucun pays trouvé</div>
         )}
@@ -291,7 +301,7 @@ export default function Ajout({ navigate }) {
   }, [form.appellation])
 
   const selectPays = (p) => {
-    setForm((f) => ({ ...f, pays: p.pays, pays_code: p.code ?? '', region: '', appellation: '', producteur: '' }))
+    setForm((f) => ({ ...f, pays: p.pays, pays_code: getCode(p), region: '', appellation: '', producteur: '' }))
     setStep(1)
   }
 
@@ -381,17 +391,19 @@ export default function Ajout({ navigate }) {
           const active = i === step
           const { Icon } = s
           return (
-            <div key={s.id} className="wz-stepper-item">
-              {i > 0 && <div className={`wz-line${i <= step ? ' filled' : ''}`} />}
-              <button
-                className={`wz-circle${active ? ' active' : done ? ' done' : ''}`}
-                onClick={() => done ? setStep(i) : undefined}
-                style={{ cursor: done ? 'pointer' : 'default' }}
-              >
-                {done ? <Check size={15} /> : <Icon size={15} />}
-              </button>
-              <span className={`wz-label${active ? ' active' : done ? ' done' : ''}`}>{s.label}</span>
-            </div>
+            <Fragment key={s.id}>
+              {i > 0 && <div className={`wz-connector${i <= step ? ' filled' : ''}`} />}
+              <div className="wz-stepper-item">
+                <button
+                  className={`wz-circle${active ? ' active' : done ? ' done' : ''}`}
+                  onClick={() => done ? setStep(i) : undefined}
+                  style={{ cursor: done ? 'pointer' : 'default' }}
+                >
+                  {done ? <Check size={15} /> : <Icon size={15} />}
+                </button>
+                <span className={`wz-label${active ? ' active' : done ? ' done' : ''}`}>{s.label}</span>
+              </div>
+            </Fragment>
           )
         })}
       </div>
