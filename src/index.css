@@ -1003,7 +1003,155 @@ h1 em {
 
 .wine-apogee strong { color: var(--text); font-weight: 500; }
 
-/* ANALYTIQUE */
+/* ANALYTIQUE — new layout */
+.an-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.an-skeleton-card {
+  height: 120px;
+  background: var(--bg-soft);
+  border-radius: 14px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.an-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.an-kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(60,30,35,0.03);
+  transition: all 0.2s;
+}
+
+.an-kpi-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgba(60,30,35,0.06);
+}
+
+.an-kpi-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--bordeaux-soft);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bordeaux);
+  flex-shrink: 0;
+}
+
+.an-kpi-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.an-kpi-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.an-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.an-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(60,30,35,0.02);
+  transition: all 0.2s;
+}
+
+.an-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 10px rgba(60,30,35,0.05);
+}
+
+.an-card-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.an-card-title {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.an-card-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.an-card-sub {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.an-chart-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.an-chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 1px 3px rgba(60,30,35,0.03);
+}
+
+.an-chart-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.an-chart-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ANALYTIQUE — legacy grid (kept for backward compat) */
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -1714,6 +1862,8 @@ h1 em {
   .donut-card { grid-column: span 12; }
   .donut-body { flex-direction: column; }
   .history-stats { grid-template-columns: repeat(2, 1fr); }
+  .an-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .an-chart-row { grid-template-columns: 1fr; }
 }
 
 /* Tablette (< 1024px) : sidebar réduite à icônes seules */
@@ -1750,6 +1900,8 @@ h1 em {
   .stat-card { grid-column: span 12; }
   .form-row, .form-row.three { grid-template-columns: 1fr; }
   .type-selector { grid-template-columns: repeat(3, 1fr); }
+  .an-kpi-row { grid-template-columns: 1fr; }
+  .an-skeleton { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* Mobile (< 600px) : sidebar → barre de navigation bas d'écran */
