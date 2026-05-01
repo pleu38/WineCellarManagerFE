@@ -18,6 +18,7 @@ const COULEUR_CONFIG = {
   Rouge:        { color: '#8b1538' },
   Blanc:        { color: '#b8884a' },
   Rosé:         { color: '#d68c95' },
+  Rose:         { color: '#d68c95' },
   Effervescent: { color: '#4a8f56' },
   Liqueur:      { color: '#c98639' },
 }
@@ -30,13 +31,23 @@ const REGION_COLORS = [
 
 function normalizeCouleur(raw) {
   if (!raw) return []
-  if (Array.isArray(raw)) {
-    return raw.map((item) => ({
-      type_vin: item.type_vin ?? item.categorie ?? item.couleur ?? item.name ?? String(Object.keys(item)[0]),
-      quantite: Number(item.quantite ?? item.count ?? item.value ?? Object.values(item).find((v) => typeof v === 'number') ?? 0),
-    })).filter((c) => c.type_vin)
+  // Object form: { "Rouge": 49, "Blanc": 31, ... }
+  if (!Array.isArray(raw)) {
+    return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite: Number(quantite) }))
   }
-  return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite: Number(quantite) }))
+  // Array with one aggregated object: [{ "Rouge": 49, "Blanc": 31, ... }]
+  // Detect by checking if every value in the first element is a number
+  if (raw.length > 0 && typeof raw[0] === 'object' && Object.values(raw[0]).every((v) => typeof v === 'number')) {
+    return Object.entries(Object.assign({}, ...raw)).map(([type_vin, quantite]) => ({
+      type_vin,
+      quantite: Number(quantite),
+    }))
+  }
+  // Standard array: [{ type_vin/categorie: "Rouge", quantite: 49 }, ...]
+  return raw.map((item) => ({
+    type_vin: item.type_vin ?? item.categorie ?? item.couleur ?? item.name,
+    quantite: Number(item.quantite ?? item.count ?? item.value ?? 0),
+  })).filter((c) => c.type_vin)
 }
 
 const tooltipStyle = {
