@@ -2570,3 +2570,15 @@ h1 em {
   transition: border-color 0.18s;
 }
 .loc-input:focus { border-color: var(--bordeaux); }
+
+.modal-overlay-3d { align-items: center; }
+
+.modal-card-3d {
+  max-width: 900px;
+  width: 100%;
+}
+
+.modal-3d-canvas {
+  height: 520px;
+  background: linear-gradient(160deg, #1a0d10 0%, #0a0507 100%);
+}
