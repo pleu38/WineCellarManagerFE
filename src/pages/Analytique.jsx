@@ -1,4 +1,10 @@
 import { useState, useEffect } from 'react'
+import { Wine, Map, Sigma } from 'lucide-react'
+import {
+  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  PieChart, Pie, Cell,
+} from 'recharts'
 import {
   getSumCru,
   getSumRegion,
@@ -28,49 +34,15 @@ function normalizeCouleur(raw) {
   return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite }))
 }
 
-function polarToCartesian(cx, cy, r, angleDeg) {
-  const rad = ((angleDeg - 90) * Math.PI) / 180
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
-}
-
-function arcPath(cx, cy, r, startDeg, endDeg) {
-  const start = polarToCartesian(cx, cy, r, endDeg)
-  const end = polarToCartesian(cx, cy, r, startDeg)
-  const large = endDeg - startDeg > 180 ? 1 : 0
-  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y}`
-}
-
-function DonutChart({ segments, size = 180, strokeWidth = 30 }) {
-  const cx = size / 2
-  const cy = size / 2
-  const r = (size - strokeWidth) / 2
-  const total = segments.reduce((s, d) => s + d.value, 0)
-  if (total === 0) return null
-
-  const GAP_DEG = 2
-  let cumDeg = 0
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f3ede6" strokeWidth={strokeWidth} />
-      {segments.map((seg, i) => {
-        const spanDeg = (seg.value / total) * 360
-        const startDeg = cumDeg + GAP_DEG / 2
-        const endDeg = cumDeg + spanDeg - GAP_DEG / 2
-        cumDeg += spanDeg
-        if (endDeg <= startDeg) return null
-        return (
-          <path
-            key={i}
-            d={arcPath(cx, cy, r, startDeg, endDeg)}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={strokeWidth}
-            strokeLinecap="butt"
-          />
-        )
-      })}
-    </svg>
-  )
+const tooltipStyle = {
+  contentStyle: {
+    fontFamily: 'Geist Mono, monospace',
+    fontSize: 12,
+    borderRadius: 8,
+    border: '1px solid #f3ede6',
+    boxShadow: '0 4px 12px rgba(60,30,35,0.08)',
+  },
+  cursor: { fill: 'rgba(139,21,56,0.04)' },
 }
 
 export default function Analytique() {
@@ -106,7 +78,6 @@ export default function Analytique() {
     })
   }, [])
 
-  const maxMillesime = Math.max(...millesimeData.map((m) => m.quantite), 1)
   const totalCouleur = couleurData.reduce((s, c) => s + (c.quantite || 0), 0)
 
   const regionSegments = [...regionData]
@@ -116,6 +87,7 @@ export default function Analytique() {
       value: r.quantite,
       color: REGION_COLORS[i % REGION_COLORS.length],
       label: r.region,
+      name: r.region,
     }))
 
   if (loading) {
@@ -143,9 +115,7 @@ export default function Analytique() {
           <div className="stat-card-top">
             <div className="stat-label">Inventaire total</div>
             <div className="stat-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M9 3h6l1 4v13a1 1 0 01-1 1H9a1 1 0 01-1-1V7l1-4z" />
-              </svg>
+              <Wine size={12} />
             </div>
           </div>
           <div className="stat-value">
@@ -160,11 +130,7 @@ export default function Analytique() {
         <div className="stat-card">
           <div className="stat-card-top">
             <div className="stat-label">Régions</div>
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M3 3v18h18" /><path d="M7 14l4-4 4 4 5-5" />
-              </svg>
-            </div>
+            <div className="stat-icon"><Map size={12} /></div>
           </div>
           <div className="stat-value">{totalRegions ?? '—'}</div>
           <div className="stat-trend">Dans la cave</div>
@@ -174,11 +140,7 @@ export default function Analytique() {
         <div className="stat-card">
           <div className="stat-card-top">
             <div className="stat-label">Moy. par cru</div>
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" />
-              </svg>
-            </div>
+            <div className="stat-icon"><Sigma size={12} /></div>
           </div>
           <div className="stat-value">{average ?? '—'}</div>
           <div className="stat-trend warn">Bouteilles / cru</div>
@@ -212,30 +174,55 @@ export default function Analytique() {
           <div className="chart-card">
             <h3>Par millésime</h3>
             <div className="chart-sub">Quantité de bouteilles par année</div>
-            <div className="chart-bars">
-              {millesimeData.map((m) => (
-                <div
-                  key={m.millesime}
-                  className="bar"
-                  style={{ height: `${Math.round((m.quantite / maxMillesime) * 100)}%` }}
-                  data-value={`${m.quantite} btl`}
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={millesimeData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3ede6" />
+                <XAxis
+                  dataKey="millesime"
+                  tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-              ))}
-            </div>
-            <div className="chart-labels">
-              {millesimeData.map((m) => (
-                <span key={m.millesime}>{m.millesime}</span>
-              ))}
-            </div>
+                <YAxis
+                  tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  formatter={(v) => [`${v} btl`, 'Quantité']}
+                />
+                <Bar dataKey="quantite" fill="#8b1538" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
 
         {/* Region donut chart */}
-        {regionData.length > 0 && (
+        {regionSegments.length > 0 && (
           <div className="donut-card">
             <h3>Par région</h3>
             <div className="donut-body">
-              <DonutChart segments={regionSegments} />
+              <PieChart width={180} height={180}>
+                <Pie
+                  data={regionSegments}
+                  cx={90}
+                  cy={90}
+                  innerRadius={52}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {regionSegments.map((seg, i) => (
+                    <Cell key={i} fill={seg.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={tooltipStyle.contentStyle}
+                  formatter={(v, n, p) => [`${v} btl`, p.payload.label]}
+                />
+              </PieChart>
               <div className="donut-legend">
                 {regionSegments.map((seg, i) => (
                   <div className="donut-legend-item" key={i}>

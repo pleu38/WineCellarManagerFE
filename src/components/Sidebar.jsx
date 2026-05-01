@@ -1,46 +1,12 @@
+import { Home, Plus, Wine, BarChart2, Clock } from 'lucide-react'
+
 export default function Sidebar({ page, navigate, totalBottles }) {
   const items = [
-    {
-      id: 'accueil',
-      label: 'Accueil',
-      icon: <path d="M3 12l9-9 9 9M5 10v10h14V10" />,
-    },
-    {
-      id: 'ajout',
-      label: 'Inscrire un vin',
-      icon: <path d="M12 5v14M5 12h14" />,
-    },
-    {
-      id: 'cave',
-      label: 'Ma cave',
-      badge: totalBottles,
-      icon: (
-        <>
-          <path d="M9 3h6l1 4v13a1 1 0 01-1 1H9a1 1 0 01-1-1V7l1-4z" />
-          <path d="M8 11h8" />
-        </>
-      ),
-    },
-    {
-      id: 'analytique',
-      label: 'Analytique',
-      icon: (
-        <>
-          <path d="M3 3v18h18" />
-          <path d="M7 14l4-4 4 4 5-5" />
-        </>
-      ),
-    },
-    {
-      id: 'historique',
-      label: 'Sorties',
-      icon: (
-        <>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </>
-      ),
-    },
+    { id: 'accueil',    label: 'Accueil',        Icon: Home },
+    { id: 'ajout',      label: 'Inscrire un vin', Icon: Plus },
+    { id: 'cave',       label: 'Ma cave',         Icon: Wine, badge: totalBottles },
+    { id: 'analytique', label: 'Analytique',      Icon: BarChart2 },
+    { id: 'historique', label: 'Sorties',         Icon: Clock },
   ]
 
   return (
@@ -55,13 +21,13 @@ export default function Sidebar({ page, navigate, totalBottles }) {
 
       <nav>
         <div className="nav-label">Navigation</div>
-        {items.map(({ id, label, icon, badge }) => (
+        {items.map(({ id, label, Icon, badge }) => (
           <button
             key={id}
             className={`nav-item${page === id ? ' active' : ''}`}
             onClick={() => navigate(id)}
           >
-            <svg className="nav-icon" viewBox="0 0 24 24">{icon}</svg>
+            <Icon className="nav-icon" />
             <span>{label}</span>
             {badge != null && <span className="nav-badge">{badge}</span>}
           </button>

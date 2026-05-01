@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Check, ArrowLeft, RotateCcw } from 'lucide-react'
 import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine } from '../api/wineApi'
 
 const TYPES = [
@@ -91,13 +92,12 @@ export default function Ajout({ navigate }) {
     <section className="page">
       <div className="page-header">
         <div>
-          <h1>
-            Inscrire <em>un vin</em>
-          </h1>
+          <h1>Inscrire <em>un vin</em></h1>
           <div className="subtitle">Ajoutez un nouveau cru à votre cave personnelle.</div>
         </div>
         <button className="btn ghost" onClick={() => navigate('accueil')}>
-          ← Retour
+          <ArrowLeft className="btn-icon" />
+          Retour
         </button>
       </div>
 
@@ -112,15 +112,18 @@ export default function Ajout({ navigate }) {
             color: '#2d6638',
             fontFamily: "'Geist Mono', monospace",
             fontSize: 13,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
-          ✓ Vin inscrit avec succès dans votre cave !
+          <Check size={16} />
+          Vin inscrit avec succès dans votre cave !
         </div>
       )}
 
       <form className="add-layout" onSubmit={handleSubmit}>
         <div className="form-card">
-          {/* Section 1 */}
           <div className="form-section">
             <div className="form-section-title">
               <span className="form-section-num">1</span>Identification
@@ -148,21 +151,11 @@ export default function Ajout({ navigate }) {
             <div className="form-row">
               <div className="field">
                 <label>Cuvée / Cru</label>
-                <input
-                  type="text"
-                  placeholder="Ex. Les Charmes"
-                  value={form.cru}
-                  onChange={set('cru')}
-                />
+                <input type="text" placeholder="Ex. Les Charmes" value={form.cru} onChange={set('cru')} />
               </div>
               <div className="field">
                 <label>Millésime</label>
-                <input
-                  type="number"
-                  placeholder="2019"
-                  value={form.millesime}
-                  onChange={set('millesime')}
-                />
+                <input type="number" placeholder="2019" value={form.millesime} onChange={set('millesime')} />
               </div>
             </div>
 
@@ -177,12 +170,7 @@ export default function Ajout({ navigate }) {
                     ))}
                   </select>
                 ) : (
-                  <input
-                    type="text"
-                    placeholder="Ex. Domaine Coche-Dury"
-                    value={form.producteur}
-                    onChange={set('producteur')}
-                  />
+                  <input type="text" placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
                 )}
               </div>
               <div className="field">
@@ -195,18 +183,12 @@ export default function Ajout({ navigate }) {
                     ))}
                   </select>
                 ) : (
-                  <input
-                    type="text"
-                    placeholder="Ex. Meursault 1er Cru"
-                    value={form.appellation}
-                    onChange={set('appellation')}
-                  />
+                  <input type="text" placeholder="Ex. Meursault 1er Cru" value={form.appellation} onChange={set('appellation')} />
                 )}
               </div>
             </div>
           </div>
 
-          {/* Section 2 */}
           <div className="form-section">
             <div className="form-section-title">
               <span className="form-section-num">2</span>Provenance &amp; quantité
@@ -224,12 +206,7 @@ export default function Ajout({ navigate }) {
                     ))}
                   </select>
                 ) : (
-                  <input
-                    type="text"
-                    placeholder="France"
-                    value={form.pays}
-                    onChange={set('pays')}
-                  />
+                  <input type="text" placeholder="France" value={form.pays} onChange={set('pays')} />
                 )}
               </div>
               <div className="field">
@@ -242,49 +219,27 @@ export default function Ajout({ navigate }) {
                     ))}
                   </select>
                 ) : (
-                  <input
-                    type="text"
-                    placeholder="Ex. Bourgogne"
-                    value={form.region}
-                    onChange={set('region')}
-                  />
+                  <input type="text" placeholder="Ex. Bourgogne" value={form.region} onChange={set('region')} />
                 )}
               </div>
               <div className="field">
                 <label>Quantité</label>
-                <input
-                  type="number"
-                  placeholder="6"
-                  min="1"
-                  value={form.quantite}
-                  onChange={set('quantite')}
-                />
+                <input type="number" placeholder="6" min="1" value={form.quantite} onChange={set('quantite')} />
               </div>
             </div>
 
             <div className="form-row">
               <div className="field">
                 <label>Apogée — début</label>
-                <input
-                  type="number"
-                  placeholder="2026"
-                  value={form.apoStart}
-                  onChange={set('apoStart')}
-                />
+                <input type="number" placeholder="2026" value={form.apoStart} onChange={set('apoStart')} />
               </div>
               <div className="field">
                 <label>Apogée — fin</label>
-                <input
-                  type="number"
-                  placeholder="2035"
-                  value={form.apoEnd}
-                  onChange={set('apoEnd')}
-                />
+                <input type="number" placeholder="2035" value={form.apoEnd} onChange={set('apoEnd')} />
               </div>
             </div>
           </div>
 
-          {/* Section 3 */}
           <div className="form-section">
             <div className="form-section-title">
               <span className="form-section-num">3</span>Notes de dégustation
@@ -305,22 +260,16 @@ export default function Ajout({ navigate }) {
 
           <div className="form-actions">
             <button className="btn" type="submit" disabled={submitting}>
-              <svg className="btn-icon" viewBox="0 0 24 24">
-                <path d="M5 12l5 5L20 7" />
-              </svg>
+              <Check className="btn-icon" />
               {submitting ? 'Inscription…' : 'Inscrire au registre'}
             </button>
-            <button
-              className="btn ghost"
-              type="button"
-              onClick={() => setForm(EMPTY)}
-            >
+            <button className="btn ghost" type="button" onClick={() => setForm(EMPTY)}>
+              <RotateCcw className="btn-icon" />
               Réinitialiser
             </button>
           </div>
         </div>
 
-        {/* Live preview */}
         <div className="preview-card">
           <div className="preview-label">Aperçu en direct</div>
 

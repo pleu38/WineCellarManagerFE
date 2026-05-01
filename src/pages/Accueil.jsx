@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Plus, Search, BarChart2, Clock } from 'lucide-react'
 import { getLastWines, getSumCru, getSumRegion, getBottleHistory } from '../api/wineApi'
 
 function formatRelativeDate(dateStr) {
@@ -80,9 +81,7 @@ export default function Accueil({ navigate }) {
           </p>
           <div className="hero-actions">
             <button className="btn" onClick={() => navigate('ajout')}>
-              <svg className="btn-icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+              <Plus className="btn-icon" />
               Inscrire un vin
             </button>
             <button className="btn ghost" onClick={() => navigate('cave')}>
@@ -117,36 +116,22 @@ export default function Accueil({ navigate }) {
 
       <div className="quick-access">
         <div className="quick-card" onClick={() => navigate('ajout')}>
-          <div className="quick-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-          </div>
+          <div className="quick-icon"><Plus size={20} /></div>
           <div className="quick-title">Nouvelle entrée</div>
           <div className="quick-desc">Inscrire un cru au registre</div>
         </div>
         <div className="quick-card" onClick={() => navigate('cave')}>
-          <div className="quick-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-5-5" />
-            </svg>
-          </div>
+          <div className="quick-icon"><Search size={20} /></div>
           <div className="quick-title">Rechercher</div>
           <div className="quick-desc">Parmi {totalBottles} références</div>
         </div>
         <div className="quick-card" onClick={() => navigate('analytique')}>
-          <div className="quick-icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M3 3v18h18" /><path d="M7 14l4-4 4 4 5-5" />
-            </svg>
-          </div>
+          <div className="quick-icon"><BarChart2 size={20} /></div>
           <div className="quick-title">Statistiques</div>
           <div className="quick-desc">Tendances et répartition</div>
         </div>
         <div className="quick-card" onClick={() => navigate('historique')}>
-          <div className="quick-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
-            </svg>
-          </div>
+          <div className="quick-icon"><Clock size={20} /></div>
           <div className="quick-title">Historique</div>
           <div className="quick-desc">Suivi des sorties</div>
         </div>
@@ -162,9 +147,7 @@ export default function Accueil({ navigate }) {
           </div>
 
           {loading && (
-            <div className="loading">
-              <span className="spinner" /> Chargement…
-            </div>
+            <div className="loading"><span className="spinner" /> Chargement…</div>
           )}
 
           {!loading && recentActivity.length === 0 && (
@@ -195,9 +178,7 @@ export default function Accueil({ navigate }) {
           </div>
 
           {loading && (
-            <div className="loading">
-              <span className="spinner" /> Chargement…
-            </div>
+            <div className="loading"><span className="spinner" /> Chargement…</div>
           )}
 
           {lastWines.map((w, i) => (

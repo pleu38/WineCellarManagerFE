@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Plus, Search } from 'lucide-react'
 import { getAllWine } from '../api/wineApi'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Bulles', 'Liqueur']
@@ -46,27 +47,20 @@ export default function Cave({ navigate }) {
     <section className="page">
       <div className="page-header">
         <div>
-          <h1>
-            Ma <em>cave</em>
-          </h1>
+          <h1>Ma <em>cave</em></h1>
           <div className="subtitle">
             {wines.length} bouteilles · {new Set(wines.map((w) => w.producteur)).size} domaines
           </div>
         </div>
         <button className="btn" onClick={() => navigate('ajout')}>
-          <svg className="btn-icon" viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
+          <Plus className="btn-icon" />
           Ajouter
         </button>
       </div>
 
       <div className="toolbar">
         <div className="search-box">
-          <svg className="search-icon" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-5-5" />
-          </svg>
+          <Search className="search-icon" size={16} />
           <input
             type="text"
             placeholder="Rechercher un domaine, un cru, un millésime…"
