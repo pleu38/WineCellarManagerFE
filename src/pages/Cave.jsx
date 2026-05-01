@@ -1,8 +1,16 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { getAllWine } from '../api/wineApi'
+import { Plus, Search, X } from 'lucide-react'
+import { getAllWine, getQuantityByWine, updateWine } from '../api/wineApi'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
+
+const ACCENT_COLORS = {
+  rouge:        'rgb(220,38,38)',
+  blanc:        'rgb(251,191,36)',
+  rose:         'rgb(236,72,153)',
+  effervescent: 'rgb(255,191,171)',
+  liqueur:      'rgb(134,153,0)',
+}
 
 function norm(s) {
   return (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -18,11 +26,122 @@ function categorieToPill(cat) {
   return 'rouge'
 }
 
+function WineModal({ wine, onClose }) {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [quantities, setQuantities] = useState({})
+  const [reasons, setReasons] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState({})
+
+  useEffect(() => {
+    getQuantityByWine(wine.cru)
+      .then((data) => {
+        setRows(data)
+        const init = {}
+        data.forEach((r) => { init[r.BID] = r.quantite })
+        setQuantities(init)
+      })
+      .catch(() => setRows([]))
+      .finally(() => setLoading(false))
+  }, [wine.cru])
+
+  const handleSave = async (row) => {
+    setSaving(true)
+    try {
+      await updateWine({ BID: row.BID, quantite: quantities[row.BID], raison: reasons[row.BID] })
+      setSaved((s) => ({ ...s, [row.BID]: true }))
+      setTimeout(() => setSaved((s) => ({ ...s, [row.BID]: false })), 2500)
+    } catch {
+      // keep state on error
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const pillClass = categorieToPill(wine.categorie)
+  const accent = ACCENT_COLORS[pillClass] ?? 'var(--bordeaux)'
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header" style={{ borderTopColor: accent }}>
+          <div>
+            <div className="modal-title">{wine.cru}</div>
+            <div className="modal-sub">{wine.appellation}{wine.producteur ? ` · ${wine.producteur}` : ''}</div>
+          </div>
+          <button className="modal-close" onClick={onClose}><X size={18} /></button>
+        </div>
+
+        <div className="modal-body">
+          {loading ? (
+            <div className="modal-loading"><span className="spinner" /> Chargement…</div>
+          ) : rows.length === 0 ? (
+            <div className="modal-empty">Aucune entrée trouvée</div>
+          ) : (
+            <div className="modal-rows">
+              {rows.map((row) => {
+                const qty = quantities[row.BID] ?? row.quantite
+                const changed = qty !== row.quantite
+                const decreasing = qty < row.quantite
+                const RAISONS = decreasing ? ['Bu', 'Cadeau'] : ['Achat', 'Cadeau']
+                return (
+                  <div className="modal-row" key={row.BID}>
+                    <div className="modal-row-top">
+                      <div className="modal-millesime">{row.millesime ?? '—'}</div>
+                      <div className="modal-qty-ctrl">
+                        <button
+                          className="qty-btn"
+                          onClick={() => setQuantities((q) => ({ ...q, [row.BID]: Math.max(0, qty - 1) }))}
+                        >−</button>
+                        <span className="qty-value">{qty}</span>
+                        <button
+                          className="qty-btn"
+                          onClick={() => setQuantities((q) => ({ ...q, [row.BID]: qty + 1 }))}
+                        >+</button>
+                        <span className="qty-label">btl</span>
+                      </div>
+                    </div>
+
+                    {changed && (
+                      <div className="modal-raison">
+                        <div className="modal-raison-label">Raison</div>
+                        <div className="modal-raison-chips">
+                          {RAISONS.map((r) => (
+                            <button
+                              key={r}
+                              className={`raison-chip${reasons[row.BID] === r ? ' active' : ''}`}
+                              onClick={() => setReasons((p) => ({ ...p, [row.BID]: r }))}
+                            >{r}</button>
+                          ))}
+                        </div>
+                        <button
+                          className="btn"
+                          style={{ marginTop: 14, width: '100%' }}
+                          onClick={() => handleSave(row)}
+                          disabled={!reasons[row.BID] || saving}
+                        >
+                          {saved[row.BID] ? '✓ Enregistré' : saving ? 'Enregistrement…' : 'Enregistrer'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Cave({ navigate }) {
   const [wines, setWines] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [activeRobe, setActiveRobe] = useState('Tous')
+  const [modalWine, setModalWine] = useState(null)
 
   useEffect(() => {
     getAllWine()
@@ -102,7 +221,12 @@ export default function Cave({ navigate }) {
         {filtered.map((w, i) => {
           const pillClass = categorieToPill(w.categorie)
           return (
-            <div className="wine-card" key={i}>
+            <div
+              className="wine-card"
+              key={i}
+              style={{ '--card-accent': ACCENT_COLORS[pillClass] }}
+              onClick={() => setModalWine(w)}
+            >
               <div className="wine-card-top">
                 <div className={`color-pill ${pillClass}`}>
                   <span className="color-dot" />
@@ -125,6 +249,10 @@ export default function Cave({ navigate }) {
           )
         })}
       </div>
+
+      {modalWine && (
+        <WineModal wine={modalWine} onClose={() => setModalWine(null)} />
+      )}
     </section>
   )
 }

@@ -1182,6 +1182,7 @@ h1 em {
 .wine-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--card-accent, var(--border));
   border-radius: 14px;
   padding: 22px;
   cursor: pointer;
@@ -2283,3 +2284,177 @@ h1 em {
   .tl-card-top { flex-direction: column; align-items: flex-start; }
   .tl-card-right { flex-wrap: wrap; }
 }
+
+/* ── Wine modal ────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 12, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 64px rgba(20, 10, 12, 0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 20px;
+  border-top: 4px solid var(--bordeaux);
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.modal-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+  margin-top: 4px;
+}
+
+.modal-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.modal-close:hover { background: var(--bg-soft); color: var(--text); }
+
+.modal-body { padding: 20px 24px 24px; }
+
+.modal-loading,
+.modal-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-rows { display: flex; flex-direction: column; gap: 12px; }
+
+.modal-row {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.modal-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modal-millesime {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--bordeaux);
+}
+
+.modal-qty-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.qty-btn:hover { background: var(--bordeaux-soft); border-color: var(--bordeaux); color: var(--bordeaux); }
+
+.qty-value {
+  font-family: 'Geist Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 28px;
+  text-align: center;
+}
+
+.qty-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.modal-raison {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.modal-raison-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.modal-raison-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.raison-chip {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+.raison-chip:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+.raison-chip.active { background: var(--bordeaux-soft); border-color: var(--bordeaux); color: var(--bordeaux); font-weight: 600; }
