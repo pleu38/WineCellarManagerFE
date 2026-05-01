@@ -15,12 +15,12 @@ import {
 } from '../api/wineApi'
 
 const COULEUR_CONFIG = {
-  Rouge:        { color: '#8b1538' },
-  Blanc:        { color: '#b8884a' },
-  Rosé:         { color: '#d68c95' },
-  Rose:         { color: '#d68c95' },
-  Effervescent: { color: '#4a8f56' },
-  Liqueur:      { color: '#c98639' },
+  Rouge:        { color: '#dc2626' },
+  Blanc:        { color: '#fbbf24' },
+  Rosé:         { color: '#ec4899' },
+  Rose:         { color: '#ec4899' },
+  Effervescent: { color: '#ffbfab' },
+  Liqueur:      { color: '#869900' },
 }
 
 const REGION_COLORS = [
@@ -163,7 +163,7 @@ export default function Analytique() {
             <span className="an-card-title">Bouteilles totales</span>
             <Wine size={16} color="#9d8e87" />
           </div>
-          <div className="an-card-value">{totalBottles ?? '—'}</div>
+          <div className="an-card-value">{totalCouleur || '—'}</div>
           <div className="an-card-sub">Dans toute la collection</div>
         </div>
         {colorChartData.map(({ name, value, color }) => (
