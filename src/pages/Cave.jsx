@@ -2,16 +2,20 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { getAllWine } from '../api/wineApi'
 
-const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Bulles', 'Liqueur']
+const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
+
+function norm(s) {
+  return (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
 
 function categorieToPill(cat) {
   if (!cat) return ''
-  const c = cat.toLowerCase()
+  const c = norm(cat)
   if (c.includes('blanc')) return 'blanc'
   if (c.includes('ros')) return 'rose'
-  if (c.includes('bull') || c.includes('champ') || c.includes('mousss')) return 'bulles'
+  if (c.includes('efferv') || c.includes('bull') || c.includes('champ') || c.includes('mouss')) return 'effervescent'
   if (c.includes('liqueur') || c.includes('doux')) return 'liqueur'
-  return ''
+  return 'rouge'
 }
 
 export default function Cave({ navigate }) {
@@ -31,7 +35,7 @@ export default function Cave({ navigate }) {
     return wines.filter((w) => {
       const matchRobe =
         activeRobe === 'Tous' ||
-        w.categorie?.toLowerCase().includes(activeRobe.toLowerCase())
+        norm(w.categorie).includes(norm(activeRobe))
       const q = search.toLowerCase()
       const matchSearch =
         !q ||
