@@ -28,35 +28,47 @@ function normalizeCouleur(raw) {
   return Object.entries(raw).map(([type_vin, quantite]) => ({ type_vin, quantite }))
 }
 
+function polarToCartesian(cx, cy, r, angleDeg) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+}
+
+function arcPath(cx, cy, r, startDeg, endDeg) {
+  const start = polarToCartesian(cx, cy, r, endDeg)
+  const end = polarToCartesian(cx, cy, r, startDeg)
+  const large = endDeg - startDeg > 180 ? 1 : 0
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y}`
+}
+
 function DonutChart({ segments, size = 180, strokeWidth = 30 }) {
+  const cx = size / 2
+  const cy = size / 2
   const r = (size - strokeWidth) / 2
-  const C = 2 * Math.PI * r
-  const GAP = 4
   const total = segments.reduce((s, d) => s + d.value, 0)
   if (total === 0) return null
-  let offset = 0
-  const arcs = segments.map((seg) => {
-    const length = Math.max((seg.value / total) * C - GAP, 0)
-    const arc = { ...seg, length, offset }
-    offset += length + GAP
-    return arc
-  })
+
+  const GAP_DEG = 2
+  let cumDeg = 0
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#f3ede6" strokeWidth={strokeWidth} />
-      <g transform={`rotate(-90, ${size / 2}, ${size / 2})`}>
-        {arcs.map((arc, i) => (
-          <circle
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f3ede6" strokeWidth={strokeWidth} />
+      {segments.map((seg, i) => {
+        const spanDeg = (seg.value / total) * 360
+        const startDeg = cumDeg + GAP_DEG / 2
+        const endDeg = cumDeg + spanDeg - GAP_DEG / 2
+        cumDeg += spanDeg
+        if (endDeg <= startDeg) return null
+        return (
+          <path
             key={i}
-            cx={size / 2} cy={size / 2} r={r}
+            d={arcPath(cx, cy, r, startDeg, endDeg)}
             fill="none"
-            stroke={arc.color}
+            stroke={seg.color}
             strokeWidth={strokeWidth}
-            strokeDasharray={`${arc.length} ${C}`}
-            strokeDashoffset={-arc.offset}
+            strokeLinecap="butt"
           />
-        ))}
-      </g>
+        )
+      })}
     </svg>
   )
 }
@@ -97,11 +109,14 @@ export default function Analytique() {
   const maxMillesime = Math.max(...millesimeData.map((m) => m.quantite), 1)
   const totalCouleur = couleurData.reduce((s, c) => s + (c.quantite || 0), 0)
 
-  const regionSegments = regionData.slice(0, 10).map((r, i) => ({
-    value: r.quantite,
-    color: REGION_COLORS[i % REGION_COLORS.length],
-    label: r.region,
-  }))
+  const regionSegments = [...regionData]
+    .sort((a, b) => a.quantite - b.quantite)
+    .slice(0, 10)
+    .map((r, i) => ({
+      value: r.quantite,
+      color: REGION_COLORS[i % REGION_COLORS.length],
+      label: r.region,
+    }))
 
   if (loading) {
     return (
