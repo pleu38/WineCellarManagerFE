@@ -2408,12 +2408,26 @@ h1 em {
 }
 .qty-btn:hover { background: var(--bordeaux-soft); border-color: var(--bordeaux); color: var(--bordeaux); }
 
+.qty-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 28px;
+}
+
 .qty-value {
   font-family: 'Geist Mono', monospace;
   font-size: 22px;
   font-weight: 700;
   color: var(--text);
-  min-width: 28px;
+  text-align: center;
+}
+
+.qty-original {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-decoration: line-through;
   text-align: center;
 }
 
@@ -2458,3 +2472,19 @@ h1 em {
 }
 .raison-chip:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
 .raison-chip.active { background: var(--bordeaux-soft); border-color: var(--bordeaux); color: var(--bordeaux); font-weight: 600; }
+
+.modal-action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.modal-action-row .btn { flex: 1; justify-content: center; }
+
+.modal-extra-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.modal-extra-btns .btn { flex: 1; justify-content: center; font-size: 12px; }
