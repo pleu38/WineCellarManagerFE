@@ -94,7 +94,12 @@ function WineModal({ wine, onClose }) {
                           className="qty-btn"
                           onClick={() => setQuantities((q) => ({ ...q, [row.BID]: Math.max(0, qty - 1) }))}
                         >−</button>
-                        <span className="qty-value">{qty}</span>
+                        <div className="qty-display">
+                          <span className="qty-value">{qty}</span>
+                          {changed && (
+                            <span className="qty-original">était {row.quantite}</span>
+                          )}
+                        </div>
                         <button
                           className="qty-btn"
                           onClick={() => setQuantities((q) => ({ ...q, [row.BID]: qty + 1 }))}
@@ -115,16 +120,31 @@ function WineModal({ wine, onClose }) {
                             >{r}</button>
                           ))}
                         </div>
-                        <button
-                          className="btn"
-                          style={{ marginTop: 14, width: '100%' }}
-                          onClick={() => handleSave(row)}
-                          disabled={!reasons[row.BID] || saving}
-                        >
-                          {saved[row.BID] ? '✓ Enregistré' : saving ? 'Enregistrement…' : 'Enregistrer'}
-                        </button>
+                        <div className="modal-action-row">
+                          <button
+                            className="btn"
+                            onClick={() => handleSave(row)}
+                            disabled={!reasons[row.BID] || saving}
+                          >
+                            {saved[row.BID] ? '✓ Enregistré' : saving ? 'Enregistrement…' : 'Enregistrer'}
+                          </button>
+                          <button
+                            className="btn ghost"
+                            onClick={() => {
+                              setQuantities((q) => ({ ...q, [row.BID]: row.quantite }))
+                              setReasons((p) => ({ ...p, [row.BID]: undefined }))
+                            }}
+                          >
+                            Annuler
+                          </button>
+                        </div>
                       </div>
                     )}
+
+                    <div className="modal-extra-btns">
+                      <button className="btn ghost">📍 Localisation</button>
+                      <button className="btn ghost">🧊 Voir en 3D</button>
+                    </div>
                   </div>
                 )
               })}
