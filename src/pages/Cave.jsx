@@ -164,8 +164,8 @@ function WineModal({ wine, onClose }) {
                   📍 Localisation
                 </button>
                 <button
-                  className={`btn ghost${show3D ? ' active-ghost' : ''}`}
-                  onClick={() => setShow3D((v) => !v)}
+                  className="btn ghost"
+                  onClick={() => setShow3D(true)}
                 >🧊 Voir en 3D</button>
               </div>
 
@@ -263,13 +263,20 @@ function WineModal({ wine, onClose }) {
                 </div>
               )}
 
-              {show3D && (
-                <CaveView3D quantite={rows.reduce((s, r) => s + (quantities[r.BID] ?? r.quantite), 0)} />
-              )}
             </div>
           )}
         </div>
       </div>
+
+      <CaveView3D
+        open={show3D}
+        onClose={() => setShow3D(false)}
+        highlightBottle={locations[0] ? {
+          rack:  locations[0].clayette,
+          row:   locations[0].rangee,
+          index: locations[0].index_id,
+        } : null}
+      />
     </div>
   )
 }
