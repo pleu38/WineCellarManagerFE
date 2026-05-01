@@ -11,11 +11,11 @@ const STEPS = [
 ]
 
 const TYPES = [
-  { id: 'Rouge',   cls: 'rouge' },
-  { id: 'Blanc',   cls: 'blanc' },
-  { id: 'Rosé',    cls: 'rose' },
-  { id: 'Bulles',  cls: 'bulles' },
-  { id: 'Liqueur', cls: 'liqueur' },
+  { id: 'Rouge',        cls: 'rouge' },
+  { id: 'Blanc',        cls: 'blanc' },
+  { id: 'Rosé',         cls: 'rose' },
+  { id: 'Effervescent', cls: 'effervescent' },
+  { id: 'Liqueur',      cls: 'liqueur' },
 ]
 
 const EMPTY = {

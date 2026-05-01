@@ -961,11 +961,11 @@ h1 em {
   box-shadow: 0 2px 4px rgba(60, 30, 35, 0.1);
 }
 
-.type-color.rouge { background: linear-gradient(135deg, #8b1538 0%, #5e0e26 100%); }
-.type-color.blanc { background: linear-gradient(135deg, #f4e4a5 0%, #d4b86a 100%); }
-.type-color.rose { background: linear-gradient(135deg, #f5b8c4 0%, #e8919f 100%); }
-.type-color.bulles { background: linear-gradient(135deg, #fff4d4 0%, #d4b86a 50%, #f4e4a5 100%); }
-.type-color.liqueur { background: linear-gradient(135deg, #d4a017 0%, #8b5e0a 100%); }
+.type-color.rouge        { background: rgb(220, 38, 38); }
+.type-color.blanc        { background: rgb(251, 191, 36); }
+.type-color.rose         { background: rgb(236, 72, 153); }
+.type-color.effervescent { background: rgb(255, 191, 171); }
+.type-color.liqueur      { background: rgb(134, 153, 0); }
 
 .type-label { font-size: 12px; font-weight: 500; color: var(--text); }
 
@@ -1220,10 +1220,11 @@ h1 em {
   font-weight: 500;
 }
 
-.color-pill.blanc { background: #fdf6e3; border-color: rgba(184, 136, 74, 0.25); color: #8a6420; }
-.color-pill.rose { background: #fce8ec; border-color: rgba(214, 140, 149, 0.3); color: #b14d5c; }
-.color-pill.bulles { background: #fdf6e3; border-color: rgba(184, 136, 74, 0.25); color: #a07f3a; }
-.color-pill.liqueur { background: #fef3cd; border-color: rgba(212, 160, 23, 0.3); color: #7a5000; }
+.color-pill.rouge        { background: rgba(220,38,38,0.08);   border-color: rgba(220,38,38,0.25);   color: rgb(220,38,38); }
+.color-pill.blanc        { background: rgba(251,191,36,0.1);   border-color: rgba(251,191,36,0.35);  color: #8a6000; }
+.color-pill.rose         { background: rgba(236,72,153,0.08);  border-color: rgba(236,72,153,0.25);  color: rgb(236,72,153); }
+.color-pill.effervescent { background: rgba(255,191,171,0.2);  border-color: rgba(255,191,171,0.5);  color: #b05030; }
+.color-pill.liqueur      { background: rgba(134,153,0,0.08);   border-color: rgba(134,153,0,0.25);   color: rgb(134,153,0); }
 
 .color-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
