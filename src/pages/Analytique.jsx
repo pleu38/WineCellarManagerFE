@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Wine, Map, Sigma } from 'lucide-react'
+import { MapPin, Package, TrendingUp, Wine, BarChart3 } from 'lucide-react'
 import {
   ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
+  PieChart, Pie,
 } from 'recharts'
 import {
   getSumCru,
@@ -35,14 +35,11 @@ function normalizeCouleur(raw) {
 }
 
 const tooltipStyle = {
-  contentStyle: {
-    fontFamily: 'Geist Mono, monospace',
-    fontSize: 12,
-    borderRadius: 8,
-    border: '1px solid #f3ede6',
-    boxShadow: '0 4px 12px rgba(60,30,35,0.08)',
-  },
-  cursor: { fill: 'rgba(139,21,56,0.04)' },
+  fontFamily: 'Geist Mono, monospace',
+  fontSize: 12,
+  borderRadius: 8,
+  border: '1px solid #f3ede6',
+  boxShadow: '0 4px 12px rgba(60,30,35,0.08)',
 }
 
 export default function Analytique() {
@@ -78,23 +75,23 @@ export default function Analytique() {
     })
   }, [])
 
-  const totalCouleur = couleurData.reduce((s, c) => s + (c.quantite || 0), 0)
+  const colorChartData = couleurData.map((c) => ({
+    name: c.type_vin,
+    value: c.quantite || 0,
+    color: COULEUR_CONFIG[c.type_vin]?.color ?? '#9d8e87',
+  }))
 
-  const regionSegments = [...regionData]
+  const totalCouleur = colorChartData.reduce((s, c) => s + c.value, 0)
+
+  const regionSorted = [...regionData]
     .sort((a, b) => a.quantite - b.quantite)
-    .slice(0, 10)
-    .map((r, i) => ({
-      value: r.quantite,
-      color: REGION_COLORS[i % REGION_COLORS.length],
-      label: r.region,
-      name: r.region,
-    }))
+    .slice(0, 12)
 
   if (loading) {
     return (
       <section className="page">
-        <div className="loading">
-          <span className="spinner" /> Chargement des analytiques…
+        <div className="an-skeleton">
+          {[...Array(4)].map((_, i) => <div key={i} className="an-skeleton-card" />)}
         </div>
       </section>
     )
@@ -109,133 +106,163 @@ export default function Analytique() {
         </div>
       </div>
 
-      <div className="analytics-grid">
-        {/* Feature card */}
-        <div className="stat-card feature">
-          <div className="stat-card-top">
-            <div className="stat-label">Inventaire total</div>
-            <div className="stat-icon">
-              <Wine size={12} />
+      {/* KPI row */}
+      <div className="an-kpi-row">
+        <div className="an-kpi-card">
+          <div className="an-kpi-icon"><MapPin size={28} /></div>
+          <div>
+            <div className="an-kpi-value">{totalRegions ?? '—'}</div>
+            <div className="an-kpi-label">Régions différentes</div>
+          </div>
+        </div>
+        <div className="an-kpi-card">
+          <div className="an-kpi-icon"><Package size={28} /></div>
+          <div>
+            <div className="an-kpi-value">{totalBottles ?? '—'}</div>
+            <div className="an-kpi-label">Vins différents</div>
+          </div>
+        </div>
+        <div className="an-kpi-card">
+          <div className="an-kpi-icon"><TrendingUp size={28} /></div>
+          <div>
+            <div className="an-kpi-value">{average ?? '—'}</div>
+            <div className="an-kpi-label">Bouteilles / vin</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Color cards row */}
+      <div className="an-cards-row">
+        <div className="an-card">
+          <div className="an-card-hdr">
+            <span className="an-card-title">Bouteilles totales</span>
+            <Wine size={16} color="#9d8e87" />
+          </div>
+          <div className="an-card-value">{totalCouleur || totalBottles || '—'}</div>
+          <div className="an-card-sub">Dans toute la collection</div>
+        </div>
+        {colorChartData.map(({ name, value, color }) => (
+          <div className="an-card" key={name}>
+            <div className="an-card-hdr">
+              <span className="an-card-title">Vins {name}</span>
+              <BarChart3 size={16} style={{ color }} />
+            </div>
+            <div className="an-card-value" style={{ color }}>{value}</div>
+            <div className="an-card-sub">
+              {totalCouleur > 0 ? Math.round((value / totalCouleur) * 100) : 0}% de la collection
             </div>
           </div>
-          <div className="stat-value">
-            {totalBottles ?? '—'}<span className="stat-unit">vins différents</span>
-          </div>
-          <div className="stat-trend" style={{ color: 'rgba(255,220,230,0.9)' }}>
-            {totalRegions ? `${totalRegions} régions représentées` : ''}
-          </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Regions count */}
-        <div className="stat-card">
-          <div className="stat-card-top">
-            <div className="stat-label">Régions</div>
-            <div className="stat-icon"><Map size={12} /></div>
-          </div>
-          <div className="stat-value">{totalRegions ?? '—'}</div>
-          <div className="stat-trend">Dans la cave</div>
-        </div>
-
-        {/* Average */}
-        <div className="stat-card">
-          <div className="stat-card-top">
-            <div className="stat-label">Moy. par cru</div>
-            <div className="stat-icon"><Sigma size={12} /></div>
-          </div>
-          <div className="stat-value">{average ?? '—'}</div>
-          <div className="stat-trend warn">Bouteilles / cru</div>
-        </div>
-
-        {/* Color breakdown cards */}
-        {couleurData.length > 0 && (
-          <div className="couleur-cards">
-            {couleurData.map((c) => {
-              const cfg = COULEUR_CONFIG[c.type_vin] ?? { color: '#9d8e87' }
-              const pct = totalCouleur > 0 ? Math.round((c.quantite / totalCouleur) * 100) : 0
-              return (
-                <div className="couleur-card" key={c.type_vin} style={{ '--cc-color': cfg.color }}>
-                  <div className="cc-header">
-                    <span className="cc-dot" />
-                    <span className="cc-label">{c.type_vin}</span>
-                  </div>
-                  <div className="cc-value">{c.quantite}</div>
-                  <div className="cc-bar-wrap">
-                    <div className="cc-bar" style={{ width: `${pct}%` }} />
-                  </div>
-                  <div className="cc-pct">{pct} %</div>
-                </div>
-              )
-            })}
+      {/* Charts row */}
+      <div className="an-chart-row">
+        {/* Color donut */}
+        {colorChartData.length > 0 && (
+          <div className="an-chart-panel">
+            <div className="an-chart-title">Répartition par couleur</div>
+            <div className="an-chart-desc">Distribution des vins par type</div>
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={colorChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name} (${(percent * 100).toFixed(0)}%)`
+                  }
+                  outerRadius={100}
+                  innerRadius={62}
+                  cornerRadius={6}
+                  paddingAngle={4}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {colorChartData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(v, n) => [`${v} btl`, n]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         )}
 
-        {/* Millesime bar chart */}
-        {millesimeData.length > 0 && (
-          <div className="chart-card">
-            <h3>Par millésime</h3>
-            <div className="chart-sub">Quantité de bouteilles par année</div>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={millesimeData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3ede6" />
+        {/* Region horizontal bar chart (replaces donut) */}
+        {regionSorted.length > 0 && (
+          <div className="an-chart-panel">
+            <div className="an-chart-title">Par région</div>
+            <div className="an-chart-desc">Classées par ordre croissant de bouteilles</div>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart
+                layout="vertical"
+                data={regionSorted}
+                margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3ede6" />
                 <XAxis
-                  dataKey="millesime"
+                  type="number"
                   tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
+                  type="category"
+                  dataKey="region"
+                  width={90}
+                  tick={{ fontSize: 11, fontFamily: 'Geist', fill: '#6b5a55' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  {...tooltipStyle}
+                  contentStyle={tooltipStyle}
                   formatter={(v) => [`${v} btl`, 'Quantité']}
+                  cursor={{ fill: 'rgba(139,21,56,0.04)' }}
                 />
-                <Bar dataKey="quantite" fill="#8b1538" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="quantite" radius={[0, 4, 4, 0]}>
+                  {regionSorted.map((_, i) => (
+                    <Cell key={i} fill={REGION_COLORS[i % REGION_COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
-
-        {/* Region donut chart */}
-        {regionSegments.length > 0 && (
-          <div className="donut-card">
-            <h3>Par région</h3>
-            <div className="donut-body">
-              <PieChart width={180} height={180}>
-                <Pie
-                  data={regionSegments}
-                  cx={90}
-                  cy={90}
-                  innerRadius={52}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {regionSegments.map((seg, i) => (
-                    <Cell key={i} fill={seg.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={tooltipStyle.contentStyle}
-                  formatter={(v, n, p) => [`${v} btl`, p.payload.label]}
-                />
-              </PieChart>
-              <div className="donut-legend">
-                {regionSegments.map((seg, i) => (
-                  <div className="donut-legend-item" key={i}>
-                    <span className="donut-legend-dot" style={{ background: seg.color }} />
-                    <span className="donut-legend-label">{seg.label}</span>
-                    <span className="donut-legend-count">{seg.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Millesime bar chart — full width */}
+      {millesimeData.length > 0 && (
+        <div className="an-chart-panel" style={{ marginTop: 16 }}>
+          <div className="an-chart-title">Par millésime</div>
+          <div className="an-chart-desc">Quantité de bouteilles par année</div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={millesimeData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3ede6" />
+              <XAxis
+                dataKey="millesime"
+                tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fontFamily: 'Geist Mono', fill: '#9d8e87' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(v) => [`${v} btl`, 'Quantité']}
+                cursor={{ fill: 'rgba(139,21,56,0.04)' }}
+              />
+              <Bar dataKey="quantite" fill="#8b1538" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </section>
   )
 }
