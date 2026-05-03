@@ -18,6 +18,14 @@ const TYPES = [
   { id: 'Liqueur',      cls: 'liqueur' },
 ]
 
+const BOTTLE_COLORS = {
+  Rouge:        { color: 'rgb(220, 38, 38)',   dim: 'rgb(150, 20, 20)' },
+  Blanc:        { color: 'rgb(251, 191, 36)',   dim: 'rgb(180, 130, 20)' },
+  Rosé:         { color: 'rgb(236, 72, 153)',   dim: 'rgb(180, 40, 110)' },
+  Effervescent: { color: 'rgb(255, 191, 171)',  dim: 'rgb(220, 140, 110)' },
+  Liqueur:      { color: 'rgb(134, 153, 0)',    dim: 'rgb(90, 105, 0)' },
+}
+
 const EMPTY = {
   type: 'Rouge', cru: '', millesime: '', producteur: '',
   appellation: '', region: '', pays: '', pays_code: '',
@@ -448,7 +456,10 @@ export default function Ajout({ navigate }) {
 
         <div className="preview-card" style={{ alignSelf: 'start' }}>
           <div className="preview-label">Aperçu en direct</div>
-          <div className="bottle-mockup">
+          <div className="bottle-mockup" style={{
+            '--bottle-color': BOTTLE_COLORS[form.type]?.color,
+            '--bottle-dim':   BOTTLE_COLORS[form.type]?.dim,
+          }}>
             <div className="bottle-label">
               <div className="bottle-label-text">
                 {preview.name.length > 16 ? preview.name.slice(0, 16) + '…' : preview.name}
