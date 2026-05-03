@@ -47,9 +47,15 @@ function WineModal({ wine, onClose }) {
       getLocationByCru(wine.cru),
     ]).then(([qty, loc]) => {
       if (qty.status === 'fulfilled') {
-        setRows(qty.value)
+        const all = qty.value
+        const millesime = Number(wine.millesime)
+        const filtered = millesime
+          ? all.filter((r) => Number(r.millesime) === millesime)
+          : all
+        const rows = filtered.length > 0 ? filtered : all
+        setRows(rows)
         const init = {}
-        qty.value.forEach((r) => { init[r.BID] = r.quantite })
+        rows.forEach((r) => { init[r.BID] = r.quantite })
         setQuantities(init)
       }
       if (loc.status === 'fulfilled') setLocations(loc.value)

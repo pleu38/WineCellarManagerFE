@@ -2069,18 +2069,14 @@ h1 em {
   flex-shrink: 0;
 }
 
-.tl-qty {
+.tl-qty-minus {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-family: 'Geist Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.tl-qty strong {
-  font-family: 'Instrument Serif', serif;
-  font-size: 17px;
-  color: var(--text);
-  font-weight: 400;
-  margin-left: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bordeaux);
 }
 
 .tl-context {
