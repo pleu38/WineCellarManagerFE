@@ -142,7 +142,9 @@ export default function Historique() {
                         </span>
                         <div className="tl-card-right">
                           <div className="tl-qty-minus">
-                            <TrendingDown size={13} />
+                            <div className="tl-qty-badge">
+                              <TrendingDown size={14} />
+                            </div>
                             <span>−{e.qte_mouvement}</span>
                           </div>
                         </div>

@@ -30,7 +30,7 @@ html, body {
   color: var(--text);
   font-family: 'Geist', sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body::before {
@@ -1025,7 +1025,7 @@ h1 em {
   transform: translateX(-50%);
   width: 70px;
   height: 150px;
-  background: linear-gradient(180deg, var(--bordeaux) 0%, var(--bordeaux-dim) 100%);
+  background: linear-gradient(180deg, var(--bottle-color, var(--bordeaux)) 0%, var(--bottle-dim, var(--bordeaux-dim)) 100%);
   border-radius: 4px 4px 12px 12px;
   box-shadow: inset -8px 0 16px rgba(0,0,0,0.3), 0 8px 20px rgba(60, 30, 35, 0.15);
 }
@@ -2032,19 +2032,20 @@ h1 em {
 /* Carte bouteille */
 .tl-card {
   flex: 1;
-  background: var(--bg-card);
+  background: linear-gradient(135deg, #fff 0%, #fdf8f5 100%);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--bordeaux-soft);
   border-radius: 12px;
   padding: 12px 18px;
   transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(60, 30, 35, 0.03);
+  box-shadow: 0 1px 4px rgba(139, 21, 56, 0.05);
   margin-top: 1px;
   min-width: 0;
 }
 
 .tl-card:hover {
-  border-color: var(--bordeaux);
-  box-shadow: 0 4px 12px rgba(60, 30, 35, 0.06);
+  border-left-color: var(--bordeaux);
+  box-shadow: 0 4px 14px rgba(139, 21, 56, 0.09);
   transform: translateX(2px);
 }
 
@@ -2069,12 +2070,24 @@ h1 em {
   flex-shrink: 0;
 }
 
+.tl-qty-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(139, 21, 56, 0.1);
+  border-radius: 8px;
+  color: var(--bordeaux);
+  flex-shrink: 0;
+}
+
 .tl-qty-minus {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: 'Geist Mono', monospace;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--bordeaux);
 }
