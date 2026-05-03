@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Download } from 'lucide-react'
+import { Download, TrendingDown } from 'lucide-react'
 import { getBottleHistory } from '../api/wineApi'
 
 function tagClass(raison) {
@@ -141,19 +141,15 @@ export default function Historique() {
                           {e.cru}{e.millesime ? ` ${e.millesime}` : ''}
                         </span>
                         <div className="tl-card-right">
-                          <span className="tl-qty">
-                            btl <strong>{e.qte_mouvement}</strong>
-                          </span>
-                          <span className={`entry-tag ${tagClass(e.raison_sortie)}`}>
-                            {tagLabel(e.raison_sortie)}
-                          </span>
+                          <div className="tl-qty-minus">
+                            <TrendingDown size={13} />
+                            <span>−{e.qte_mouvement}</span>
+                          </div>
                         </div>
                       </div>
-                      {(e.raison_sortie || e.origine_mouvement) && (
-                        <div className="tl-context">
-                          {[e.raison_sortie, e.origine_mouvement].filter(Boolean).join(' · ')}
-                        </div>
-                      )}
+                      <div className="tl-context">
+                        {[tagLabel(e.raison_sortie), e.type_vin ?? e.categorie].filter(Boolean).join(' · ')}
+                      </div>
                     </div>
                   </div>
                 )
