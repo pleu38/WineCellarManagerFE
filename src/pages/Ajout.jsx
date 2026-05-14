@@ -157,7 +157,6 @@ function StepAppellation({ list, region, onSelect, onBack }) {
 
 function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
   const [q, setQ] = useState('')
-  const [customMode, setCustomMode] = useState(false)
   const [isAddingProducteur, setIsAddingProducteur] = useState(false)
   
   const filtered = list.filter((p) =>
@@ -253,7 +252,7 @@ function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
   )
 }
 
-function StepDetails({ form, setForm, onSubmit, submitting }) {
+function StepDetails({ form, setForm, onSubmit, submitting, manualProducteur }) {
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
   return (
     <div className="wz-step">
@@ -289,7 +288,8 @@ function StepDetails({ form, setForm, onSubmit, submitting }) {
           </div>
         </div>
 
-        {!form.producteur && (
+        {/* Afficher le champ producteur si pas de producteur sélectionné OU en mode saisie manuelle */}
+        {(!form.producteur || manualProducteur) && (
           <div className="field">
             <label>Producteur / Domaine</label>
             <input type="text" placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
@@ -342,6 +342,7 @@ export default function Ajout({ navigate }) {
   const [producteursList, setProducteursList] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [manualProducteur, setManualProducteur] = useState(false)
 
   useEffect(() => { getPays().catch(() => []).then(setPaysList) }, [])
 
@@ -363,12 +364,14 @@ export default function Ajout({ navigate }) {
   const selectPays = (p) => {
     console.log('[Ajout] Pays sélectionné:', p)
     setForm((f) => ({ ...f, pays: p.pays, pays_code: getCode(p), region: '', appellation: '', producteur: '' }))
+    setManualProducteur(false)
     setStep(1)
   }
 
   const selectRegion = (r) => {
     console.log('[Ajout] Région sélectionnée:', r)
     setForm((f) => ({ ...f, region: r.region, appellation: '', producteur: '' }))
+    setManualProducteur(false)
     setStep(2)
   }
 
@@ -376,6 +379,7 @@ export default function Ajout({ navigate }) {
     const name = a.appellation ?? a.nom ?? ''
     console.log('[Ajout] Appellation sélectionnée:', name)
     setForm((f) => ({ ...f, appellation: name, producteur: '' }))
+    setManualProducteur(false)
     setStep(3)
   }
 
@@ -383,6 +387,7 @@ export default function Ajout({ navigate }) {
     const name = p.producteur ?? p.nom ?? ''
     console.log('[Ajout] Producteur sélectionné:', name)
     setForm((f) => ({ ...f, producteur: name }))
+    setManualProducteur(false)
     setStep(4)
   }
 
@@ -410,6 +415,7 @@ export default function Ajout({ navigate }) {
       setSuccess(true)
       setForm(EMPTY)
       setStep(0)
+      setManualProducteur(false)
       setTimeout(() => setSuccess(false), 4000)
     } catch (error) {
       console.error('[Ajout] Erreur lors de l\'inscription du vin:', error)
@@ -422,6 +428,7 @@ export default function Ajout({ navigate }) {
     console.log('[Ajout] Réinitialisation du formulaire')
     setForm(EMPTY)
     setStep(0)
+    setManualProducteur(false)
   }
 
   const preview = {
@@ -512,7 +519,11 @@ export default function Ajout({ navigate }) {
               appellation={form.appellation}
               onSelect={selectProducteur}
               onBack={() => setStep(2)}
-              onSkip={() => setStep(4)}
+              onSkip={() => {
+                console.log('[Ajout] Mode saisie manuelle du producteur activé')
+                setManualProducteur(true)
+                setStep(4)
+              }}
             />
           )}
           {step === 4 && (
@@ -521,6 +532,7 @@ export default function Ajout({ navigate }) {
               setForm={setForm}
               onSubmit={handleSubmit}
               submitting={submitting}
+              manualProducteur={manualProducteur}
             />
           )}
         </div>
