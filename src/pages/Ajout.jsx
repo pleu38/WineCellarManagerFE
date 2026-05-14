@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { Check, ArrowLeft, RotateCcw, Globe, MapPin, Landmark, User, Wine, Search } from 'lucide-react'
-import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine } from '../api/wineApi'
+import { getPays, getRegionsByPays, getAppellationsByRegion, getProducteursByAppellation, addWine, addProducteur } from '../api/wineApi'
 
 const STEPS = [
   { id: 'pays',        label: 'Pays',        Icon: Globe },
@@ -157,9 +157,33 @@ function StepAppellation({ list, region, onSelect, onBack }) {
 
 function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
   const [q, setQ] = useState('')
+  const [customMode, setCustomMode] = useState(false)
+  const [isAddingProducteur, setIsAddingProducteur] = useState(false)
+  
   const filtered = list.filter((p) =>
     (p.producteur ?? p.nom ?? '').toLowerCase().includes(q.toLowerCase())
   )
+
+  const handleAddCustomProducteur = async () => {
+    if (!q.trim()) {
+      console.warn('[Ajout] Tentative d\'ajout d\'un producteur vide')
+      return
+    }
+
+    console.log('[Ajout] Ajout d\'un nouveau producteur:', { appellation, producteur: q })
+    setIsAddingProducteur(true)
+    
+    try {
+      await addProducteur({ appellation, producteur: q })
+      console.log('[Ajout] Producteur ajouté avec succès:', q)
+      onSelect({ producteur: q, nom: q })
+    } catch (error) {
+      console.error('[Ajout] Erreur lors de l\'ajout du producteur:', error)
+    } finally {
+      setIsAddingProducteur(false)
+    }
+  }
+
   return (
     <div className="wz-step">
       <div className="wz-step-hd">
@@ -175,7 +199,10 @@ function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
           className="wz-search"
           placeholder="Rechercher un producteur…"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            console.log('[Ajout] Recherche producteur:', e.target.value)
+            setQ(e.target.value)
+          }}
           autoFocus
         />
       </div>
@@ -183,14 +210,43 @@ function StepProducteur({ list, appellation, onSelect, onBack, onSkip }) {
         {filtered.map((p) => {
           const name = p.producteur ?? p.nom ?? ''
           return (
-            <button key={name} className="wz-item" onClick={() => onSelect(p)}>
+            <button 
+              key={name} 
+              className="wz-item" 
+              onClick={() => {
+                console.log('[Ajout] Producteur sélectionné:', name)
+                onSelect(p)
+              }}
+            >
               <span className="wz-name">{name}</span>
             </button>
           )
         })}
-        {filtered.length === 0 && <div className="wz-empty">Aucun producteur trouvé</div>}
+        {filtered.length === 0 && (
+          <div className="wz-empty">
+            {q.trim() ? 'Aucun producteur trouvé' : 'Aucun producteur trouvé'}
+          </div>
+        )}
       </div>
-      <button className="wz-skip" onClick={onSkip}>
+
+      {/* Options pour ajouter manuellement */}
+      {q.trim() && filtered.length === 0 && (
+        <button 
+          className="wz-skip" 
+          onClick={() => {
+            console.log('[Ajout] Bouton "Ajouter domaine personnalisé" cliqué pour:', q)
+            handleAddCustomProducteur()
+          }}
+          disabled={isAddingProducteur}
+        >
+          {isAddingProducteur ? 'Ajout en cours…' : `Ajouter "${q}" →`}
+        </button>
+      )}
+
+      <button className="wz-skip" onClick={() => {
+        console.log('[Ajout] Bouton "Saisir manuellement" cliqué')
+        onSkip()
+      }}>
         Saisir manuellement →
       </button>
     </div>
@@ -305,28 +361,41 @@ export default function Ajout({ navigate }) {
   }, [form.appellation])
 
   const selectPays = (p) => {
+    console.log('[Ajout] Pays sélectionné:', p)
     setForm((f) => ({ ...f, pays: p.pays, pays_code: getCode(p), region: '', appellation: '', producteur: '' }))
     setStep(1)
   }
 
   const selectRegion = (r) => {
+    console.log('[Ajout] Région sélectionnée:', r)
     setForm((f) => ({ ...f, region: r.region, appellation: '', producteur: '' }))
     setStep(2)
   }
 
   const selectAppellation = (a) => {
     const name = a.appellation ?? a.nom ?? ''
+    console.log('[Ajout] Appellation sélectionnée:', name)
     setForm((f) => ({ ...f, appellation: name, producteur: '' }))
     setStep(3)
   }
 
   const selectProducteur = (p) => {
-    setForm((f) => ({ ...f, producteur: p.producteur ?? p.nom ?? '' }))
+    const name = p.producteur ?? p.nom ?? ''
+    console.log('[Ajout] Producteur sélectionné:', name)
+    setForm((f) => ({ ...f, producteur: name }))
     setStep(4)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('[Ajout] Soumission du formulaire avec les données:', {
+      cru: form.cru,
+      millesime: form.millesime,
+      producteur: form.producteur,
+      appellation: form.appellation,
+      categorie: form.type,
+      quantite: form.quantite,
+    })
     setSubmitting(true)
     try {
       await addWine({
@@ -337,18 +406,20 @@ export default function Ajout({ navigate }) {
         categorie: form.type,
         quantite: parseInt(form.quantite) || 0,
       })
+      console.log('[Ajout] Vin inscrit avec succès')
       setSuccess(true)
       setForm(EMPTY)
       setStep(0)
       setTimeout(() => setSuccess(false), 4000)
-    } catch {
-      // keep form as-is on error
+    } catch (error) {
+      console.error('[Ajout] Erreur lors de l\'inscription du vin:', error)
     } finally {
       setSubmitting(false)
     }
   }
 
   const reset = () => {
+    console.log('[Ajout] Réinitialisation du formulaire')
     setForm(EMPTY)
     setStep(0)
   }
