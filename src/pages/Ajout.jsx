@@ -400,9 +400,26 @@ export default function Ajout({ navigate }) {
       appellation: form.appellation,
       categorie: form.type,
       quantite: form.quantite,
+      manualProducteur,
     })
     setSubmitting(true)
     try {
+      // Si le producteur a été saisi manuellement, l'ajouter via l'endpoint /producteur/add
+      if (manualProducteur && form.producteur && form.appellation) {
+        console.log('[Ajout] Ajout du producteur manuel via /producteur/add:', {
+          appellation: form.appellation,
+          producteur: form.producteur,
+          cepages: '',
+        })
+        await addProducteur({
+          appellation: form.appellation,
+          producteur: form.producteur,
+          cepages: '',
+        })
+        console.log('[Ajout] Producteur manuel ajouté avec succès')
+      }
+
+      // Ajouter le vin
       await addWine({
         cru: form.cru,
         millesime: form.millesime ? parseInt(form.millesime) : null,
