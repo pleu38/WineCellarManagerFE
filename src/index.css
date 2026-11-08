@@ -2591,3 +2591,74 @@ h1 em {
   height: 520px;
   background: #ffffff;
 }
+
+/* ── Modales : scroll interne + message d'erreur ───────────── */
+.modal-card:not(.modal-card-3d) {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 48px);
+}
+.modal-card:not(.modal-card-3d) .modal-header { flex-shrink: 0; }
+.modal-card:not(.modal-card-3d) .modal-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-error {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.1);
+  color: rgb(185, 28, 28);
+  font-size: 13px;
+}
+
+/* ── Modal de confirmation (même structure que WineModal) ──── */
+.modal-overlay-confirm { z-index: 300; }
+
+.confirm-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.btn.danger {
+  background: rgb(185, 28, 28);
+  border-color: rgb(185, 28, 28);
+}
+.btn.danger:hover {
+  background: rgb(153, 27, 27);
+  border-color: rgb(153, 27, 27);
+  box-shadow: 0 8px 20px rgba(185, 28, 28, 0.2);
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── Modales en bottom sheet sur téléphone ─────────────────── */
+@media (max-width: 600px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-card:not(.modal-card-3d) {
+    max-width: none;
+    max-height: 92dvh;
+    border-radius: 20px 20px 0 0;
+    animation: sheetUp 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .modal-body { padding: 16px 16px 24px; }
+  .modal-header { padding: 20px 16px 16px; }
+
+  /* Cibles tactiles confortables (44px) */
+  .qty-btn { width: 44px; height: 44px; font-size: 22px; }
+  .modal-close { width: 40px; height: 40px; }
+  .raison-chip { padding: 14px 10px; font-size: 14px; }
+  .modal-action-row .btn,
+  .modal-extra-btns .btn { padding: 13px 18px; font-size: 14px; }
+}
