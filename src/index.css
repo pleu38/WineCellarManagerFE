@@ -2734,3 +2734,97 @@ h1 em {
   .intro-seal,.intro-content,.intro-rule span,.intro-progress span { animation: none !important; }
   .intro-rule span,.intro-progress span { width: 100%; }
 }
+
+/* Maison des Vins : identité de la maquette et introduction courte (2,1 s) */
+.brand-logo {
+  border: 1px solid var(--gold);
+  background: var(--bg-soft);
+  color: var(--gold);
+  box-shadow: none;
+  flex-shrink: 0;
+}
+.brand-name { font-size: 19px; }
+.brand-sub { color: var(--gold); }
+.chateau-mark { display: inline-block; font-family: Georgia, serif; font-weight: 400; line-height: 1; color: inherit; }
+.brand-logo .chateau-mark { font-size: 28px; }
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  min-height: 100dvh;
+  padding: 36px 22px 85px;
+  background: radial-gradient(circle at 50% 47%, #553044 0%, #261b27 37%, #100f16 85%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff5ed;
+  isolation: isolate;
+}
+.intro-content { display: flex; flex-direction: column; align-items: center; animation: none; max-width: 100%; }
+.intro-halo {
+  position: absolute;
+  width: min(85vw, 540px);
+  aspect-ratio: 1;
+  border: 1px solid #e2bd8733;
+  border-radius: 50%;
+  box-shadow: 0 0 0 45px #d8b77f08, 0 0 0 95px #d8b77f06;
+  animation: maisonHalo 1.2s ease both;
+  pointer-events: none;
+}
+.intro-spark { font-size: 21px; color: #b78864; margin-bottom: 12px; animation: maisonRise .65s both; }
+.intro-castle {
+  margin: 0 0 18px;
+  font-size: 76px;
+  color: #e5c38e;
+  text-shadow: 0 0 40px #dfb27455;
+  animation: maisonCastle .85s .1s both;
+}
+.intro-eyebrow {
+  color: #d7b78f;
+  letter-spacing: 5px;
+  font: 500 10px 'Geist Mono', monospace;
+  text-transform: uppercase;
+  animation: maisonRise .6s .22s both;
+}
+.intro-title {
+  margin: 16px 12px 21px;
+  font: 400 clamp(29px, 6vw, 61px)/1.15 Georgia, serif;
+  letter-spacing: 3px;
+  text-align: center;
+  color: #fff5ed;
+  animation: maisonRise .65s .34s both;
+}
+.intro-title em { font-style: normal; color: #d9b67a; }
+.intro-rule { margin: 0 auto; width: min(210px, 55vw); background: #6f505c; }
+.intro-rule span { background: #e7c58f; animation: maisonLine 1.25s .25s both; }
+.intro-subtitle {
+  margin-top: 23px;
+  color: #c5b0b9;
+  letter-spacing: 1px;
+  font: italic 15px Georgia,serif;
+  text-align: center;
+  animation: maisonRise .65s .5s both;
+}
+.intro-skip {
+  position: absolute;
+  bottom: clamp(24px, 6vh, 55px);
+  right: clamp(20px, 5vw, 65px);
+  margin: 0;
+  padding: 10px 14px;
+  color: #c9b8b9;
+  border: 1px solid #ffffff27;
+  border-radius: 10px;
+  background: #ffffff0b;
+  text-decoration: none;
+  font-size: 12px;
+}
+.intro-skip:hover { border-color: #e4c28b; color: #fff; }
+@keyframes maisonRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes maisonCastle { from { opacity: 0; transform: scale(.75) rotate(-8deg); filter: blur(6px); } to { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); } }
+@keyframes maisonHalo { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+@keyframes maisonLine { from { width: 0; } to { width: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .intro-screen *, .intro-screen *::before, .intro-screen *::after { animation: none !important; transition: none !important; }
+  .intro-rule span { width: 100%; }
+}
