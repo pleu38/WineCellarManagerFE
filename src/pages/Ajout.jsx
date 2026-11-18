@@ -394,6 +394,10 @@ export default function Ajout({ navigate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!form.cru.trim() || !form.producteur.trim() || !form.appellation.trim() || !(Number(form.quantite) > 0)) {
+      setSubmitError('Veuillez renseigner le cru, le producteur, l’appellation et une quantité positive.')
+      return
+    }
     console.log('[Ajout] Soumission du formulaire avec les données:', {
       cru: form.cru,
       millesime: form.millesime,
@@ -438,6 +442,7 @@ export default function Ajout({ navigate }) {
       setTimeout(() => setSuccess(false), 4000)
     } catch (error) {
       console.error('[Ajout] Erreur lors de l\'inscription du vin:', error)
+      setSubmitError(error.message || "Impossible d'inscrire ce vin.")
     } finally {
       setSubmitting(false)
     }
