@@ -15,7 +15,7 @@ export default function App() {
       const value = localStorage.getItem('vinotheque-theme')
       if (value === 'light' || value === 'dark') return value
     } catch {}
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    return 'dark'
   })
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -30,10 +30,10 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (showIntro) return <IntroScreen onFinish={finishIntro} />
-
+  // L'accueil se charge sous l'introduction : les requêtes API commencent immédiatement.
   return (
-    <div className="app">
+    <>
+    <div className="app" inert={showIntro ? true : undefined}>
       <Sidebar page={page} navigate={navigate} theme={theme} toggleTheme={toggleTheme} />
       <main>
         {page === 'accueil'    && <Accueil    navigate={navigate} />}
@@ -43,5 +43,7 @@ export default function App() {
         {page === 'historique' && <Historique navigate={navigate} />}
       </main>
     </div>
+    {showIntro && <IntroScreen onFinish={finishIntro} />}
+    </>
   )
 }
