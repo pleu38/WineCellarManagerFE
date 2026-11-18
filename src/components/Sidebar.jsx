@@ -1,4 +1,5 @@
 import { Home, Plus, Wine, BarChart2, Clock, Sun, Moon } from 'lucide-react'
+import ChateauMark from './ChateauMark'
 
 export default function Sidebar({ page, navigate, totalBottles, theme, toggleTheme }) {
   const items = [
@@ -12,10 +13,10 @@ export default function Sidebar({ page, navigate, totalBottles, theme, toggleThe
   return (
     <aside>
       <div className="brand">
-        <div className="brand-logo">V</div>
+        <div className="brand-logo"><ChateauMark /></div>
         <div>
-          <div className="brand-name">Vinothèque</div>
-          <div className="brand-sub">Cave personnelle</div>
+          <div className="brand-name">Maison des Vins</div>
+          <div className="brand-sub">Collection privée</div>
         </div>
       </div>
 

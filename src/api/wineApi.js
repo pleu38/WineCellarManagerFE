@@ -1,5 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-const API_KEY = import.meta.env.VITE_API_KEY || ''
+// En conteneur, /config.js est généré au démarrage par Nginx.
+const runtimeConfig = typeof window === 'undefined' ? {} : (window.__WINECELLAR_CONFIG__ ?? {})
+const BASE_URL = runtimeConfig.apiBaseUrl ?? import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+const API_KEY = runtimeConfig.apiKey ?? import.meta.env.VITE_API_KEY ?? ''
 
 function headers(extra = {}) {
   return { 'Content-Type': 'application/json', 'API-Key': API_KEY, ...extra }
