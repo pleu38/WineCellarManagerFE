@@ -111,7 +111,7 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
   const [locations, setLocations] = useState([])
   const [showLocation, setShowLocation] = useState(false)
   const [editingLocation, setEditingLocation] = useState(false)
-  const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '' })
+  const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '', localisation_cave: '1' })
   const [savingLoc, setSavingLoc] = useState(false)
   const [show3D, setShow3D] = useState(false)
 
@@ -211,6 +211,16 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
   }
 
   const handleSaveLocation = async () => {
+    // Le backend attend un BID, pas uniquement le nom du cru.
+    if (ambiguousLocation || rows.length !== 1) {
+      setError("Localisation ambiguë : impossible de sélectionner une bouteille unique.")
+      return
+    }
+    const values = [locForm.clayette, locForm.rangee, locForm.index_id, locForm.localisation_cave]
+    if (values.some(v => v === '' || !Number.isInteger(Number(v)) || Number(v) < 1)) {
+      setError('Indiquez des numéros entiers positifs pour la zone et la position.')
+      return
+    }
     setSavingLoc(true)
     try {
       const newLoc = {
@@ -218,7 +228,13 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
         rangee: Number(locForm.rangee),
         index_id: Number(locForm.index_id),
       }
-      await addWineLocation(wine.cru, newLoc)
+      await addWineLocation(wine.cru, {
+        bouteille_id: rows[0].BID,
+        numero_clayette: newLoc.clayette,
+        localisation_cave: Number(locForm.localisation_cave),
+        rang_clayette: newLoc.rangee,
+        index_clayette: newLoc.index_id,
+      })
       setLocations([{ ...newLoc, cru: wine.cru }])
       setEditingLocation(false)
     } catch (err) {
@@ -370,6 +386,8 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
                         )}
                         <button
                           className="btn ghost"
+                          disabled={ambiguousLocation || rows.length !== 1}
+                          title={ambiguousLocation || rows.length !== 1 ? 'Emplacement non modifiable sans identifiant unique' : undefined}
                           style={{ marginTop: 12, width: '100%', justifyContent: 'center' }}
                           onClick={() => {
                             const first = locations[0]
@@ -377,6 +395,7 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
                               clayette: first?.clayette ?? '',
                               rangee: first?.rangee ?? '',
                               index_id: first?.index_id ?? '',
+                              localisation_cave: '1',
                             })
                             setEditingLocation(true)
                           }}
@@ -391,6 +410,7 @@ function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
                             { key: 'clayette', label: 'Clayette' },
                             { key: 'rangee',   label: 'Rangée' },
                             { key: 'index_id', label: 'Position' },
+                            { key: 'localisation_cave', label: 'Zone (ID)' },
                           ].map(({ key, label }) => (
                             <div className="modal-loc-field" key={key}>
                               <span className="modal-location-label">{label}</span>
