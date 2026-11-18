@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import IntroScreen from './components/IntroScreen'
 import Sidebar from './components/Sidebar'
 import Accueil from './pages/Accueil'
 import Cave from './pages/Cave'
@@ -8,15 +9,32 @@ import Historique from './pages/Historique'
 
 export default function App() {
   const [page, setPage] = useState('accueil')
+  const [showIntro, setShowIntro] = useState(true)
+  const [theme, setTheme] = useState(() => {
+    try {
+      const value = localStorage.getItem('vinotheque-theme')
+      if (value === 'light' || value === 'dark') return value
+    } catch {}
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.documentElement.style.colorScheme = theme
+    try { localStorage.setItem('vinotheque-theme', theme) } catch {}
+  }, [theme])
+  const finishIntro = useCallback(() => setShowIntro(false), [])
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
 
   const navigate = (target) => {
     setPage(target)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  if (showIntro) return <IntroScreen onFinish={finishIntro} />
+
   return (
     <div className="app">
-      <Sidebar page={page} navigate={navigate} />
+      <Sidebar page={page} navigate={navigate} theme={theme} toggleTheme={toggleTheme} />
       <main>
         {page === 'accueil'    && <Accueil    navigate={navigate} />}
         {page === 'ajout'      && <Ajout      navigate={navigate} />}

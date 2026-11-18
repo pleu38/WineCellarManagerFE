@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Plus, Search, X } from 'lucide-react'
 import { getAllWine, getQuantityByWine, getLocationByCru, updateWine, addWineLocation } from '../api/wineApi'
 import { CaveView3D } from '../components/CaveView3D'
+import { sameWineIdentity, groupWines, hasCruCollision } from '../utils/wineIdentity'
 
 const ROBES = ['Tous', 'Rouge', 'Blanc', 'Rosé', 'Effervescent', 'Liqueur']
 
@@ -98,7 +99,7 @@ function ConfirmModal({ wine, row, onConfirm, onCancel }) {
 }
 
 /* ── Modal d'une bouteille ───────────────────────────────────── */
-function WineModal({ wine, onClose, onSaved }) {
+function WineModal({ wine, onClose, onSaved, ambiguousLocation }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [quantities, setQuantities] = useState({})
@@ -110,7 +111,7 @@ function WineModal({ wine, onClose, onSaved }) {
   const [locations, setLocations] = useState([])
   const [showLocation, setShowLocation] = useState(false)
   const [editingLocation, setEditingLocation] = useState(false)
-  const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '' })
+  const [locForm, setLocForm] = useState({ clayette: '', rangee: '', index_id: '', localisation_cave: '1' })
   const [savingLoc, setSavingLoc] = useState(false)
   const [show3D, setShow3D] = useState(false)
 
@@ -128,20 +129,17 @@ function WineModal({ wine, onClose, onSaved }) {
     ]).then(([qty, loc]) => {
       if (qty.status === 'fulfilled') {
         const all = qty.value
-        const millesime = Number(wine.millesime)
-        const filtered = millesime
-          ? all.filter((r) => Number(r.millesime) === millesime)
-          : all
-        const list = filtered.length > 0 ? filtered : all
+        // Sélection stricte : jamais un autre millésime ou un autre producteur.
+        const list = (Array.isArray(all) ? all : []).filter((row) => sameWineIdentity(row, wine))
         setRows(list)
         const init = {}
         list.forEach((r) => { init[r.BID] = r.quantite })
         setQuantities(init)
       }
-      if (loc.status === 'fulfilled') setLocations(loc.value)
+      if (!ambiguousLocation && loc.status === 'fulfilled') setLocations(loc.value)
       setLoading(false)
     })
-  }, [wine.cru, wine.millesime])
+  }, [wine.cru, wine.millesime, wine.producteur, wine.appellation, wine.categorie, ambiguousLocation])
 
   const cancelConfirm = useCallback(() => setPendingRow(null), [])
 
@@ -166,7 +164,6 @@ function WineModal({ wine, onClose, onSaved }) {
     setSavingId(row.BID)
     setError('')
     try {
-      console.log('Envoi updateWine payload:', payload)
       await updateWine(payload)
 
       setSaved((s) => ({ ...s, [row.BID]: true }))
@@ -214,6 +211,16 @@ function WineModal({ wine, onClose, onSaved }) {
   }
 
   const handleSaveLocation = async () => {
+    // Le backend attend un BID, pas uniquement le nom du cru.
+    if (ambiguousLocation || rows.length !== 1) {
+      setError("Localisation ambiguë : impossible de sélectionner une bouteille unique.")
+      return
+    }
+    const values = [locForm.clayette, locForm.rangee, locForm.index_id, locForm.localisation_cave]
+    if (values.some(v => v === '' || !Number.isInteger(Number(v)) || Number(v) < 1)) {
+      setError('Indiquez des numéros entiers positifs pour la zone et la position.')
+      return
+    }
     setSavingLoc(true)
     try {
       const newLoc = {
@@ -221,7 +228,13 @@ function WineModal({ wine, onClose, onSaved }) {
         rangee: Number(locForm.rangee),
         index_id: Number(locForm.index_id),
       }
-      await addWineLocation(wine.cru, newLoc)
+      await addWineLocation(wine.cru, {
+        bouteille_id: rows[0].BID,
+        numero_clayette: newLoc.clayette,
+        localisation_cave: Number(locForm.localisation_cave),
+        rang_clayette: newLoc.rangee,
+        index_clayette: newLoc.index_id,
+      })
       setLocations([{ ...newLoc, cru: wine.cru }])
       setEditingLocation(false)
     } catch (err) {
@@ -344,6 +357,9 @@ function WineModal({ wine, onClose, onSaved }) {
                   >🧊 Voir en 3D</button>
                 </div>
 
+                {showLocation && ambiguousLocation && (
+                  <p className="location-warning" role="status">Ce cru existe sous plusieurs références. L'API ne permet pas encore d'associer de manière sûre les localisations à ce millésime.</p>
+                )}
                 {showLocation && (
                   <div className="modal-location">
                     {!editingLocation ? (
@@ -370,6 +386,8 @@ function WineModal({ wine, onClose, onSaved }) {
                         )}
                         <button
                           className="btn ghost"
+                          disabled={ambiguousLocation || rows.length !== 1}
+                          title={ambiguousLocation || rows.length !== 1 ? 'Emplacement non modifiable sans identifiant unique' : undefined}
                           style={{ marginTop: 12, width: '100%', justifyContent: 'center' }}
                           onClick={() => {
                             const first = locations[0]
@@ -377,6 +395,7 @@ function WineModal({ wine, onClose, onSaved }) {
                               clayette: first?.clayette ?? '',
                               rangee: first?.rangee ?? '',
                               index_id: first?.index_id ?? '',
+                              localisation_cave: '1',
                             })
                             setEditingLocation(true)
                           }}
@@ -391,6 +410,7 @@ function WineModal({ wine, onClose, onSaved }) {
                             { key: 'clayette', label: 'Clayette' },
                             { key: 'rangee',   label: 'Rangée' },
                             { key: 'index_id', label: 'Position' },
+                            { key: 'localisation_cave', label: 'Zone (ID)' },
                           ].map(({ key, label }) => (
                             <div className="modal-loc-field" key={key}>
                               <span className="modal-location-label">{label}</span>
@@ -456,6 +476,7 @@ function WineModal({ wine, onClose, onSaved }) {
 /* ── Page Cave ───────────────────────────────────────────────── */
 export default function Cave({ navigate }) {
   const [wines, setWines] = useState([])
+  const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [activeRobe, setActiveRobe] = useState('Tous')
@@ -463,16 +484,18 @@ export default function Cave({ navigate }) {
 
   const loadWines = () =>
     getAllWine()
-      .then((data) => setWines(data))
-      .catch(() => setWines([]))
+      .then((data) => { setWines(Array.isArray(data) ? data : []); setLoadError('') })
+      .catch(() => { setLoadError('Impossible de récupérer les vins depuis l’API.'); setWines([]) })
 
   useEffect(() => {
     loadWines().finally(() => setLoading(false))
   }, [])
 
+  const groupedWines = useMemo(() => groupWines(wines), [wines])
+
   const filtered = useMemo(() => {
     const q = norm(search)
-    return wines.filter((w) => {
+    return groupedWines.filter((w) => {
       const matchRobe =
         activeRobe === 'Tous' ||
         norm(w.categorie).includes(norm(activeRobe))
@@ -484,7 +507,7 @@ export default function Cave({ navigate }) {
         String(w.millesime ?? '').includes(q)
       return matchRobe && matchSearch
     })
-  }, [wines, search, activeRobe])
+  }, [groupedWines, search, activeRobe])
 
   return (
     <section className="page">
@@ -492,7 +515,7 @@ export default function Cave({ navigate }) {
         <div>
           <h1>Ma <em>cave</em></h1>
           <div className="subtitle">
-            {wines.length} bouteilles · {new Set(wines.map((w) => w.producteur)).size} domaines
+            {groupedWines.reduce((sum, w) => sum + Number(w.quantite || 0), 0)} bouteilles · {groupedWines.length} cuvées · {new Set(groupedWines.map((w) => norm(w.producteur))).size} domaines
           </div>
         </div>
         <button className="btn" onClick={() => navigate('ajout')}>
@@ -530,7 +553,8 @@ export default function Cave({ navigate }) {
         </div>
       )}
 
-      {!loading && filtered.length === 0 && (
+      {loadError && <div className="modal-error" role="alert">{loadError}</div>}
+      {!loading && !loadError && filtered.length === 0 && (
         <div className="empty-state">
           <div className="empty-state-icon">🔍</div>
           <p>Aucun vin ne correspond à cette recherche</p>
@@ -543,7 +567,7 @@ export default function Cave({ navigate }) {
           return (
             <div
               className="wine-card"
-              key={`${w.cru}-${w.millesime}-${w.producteur}`}
+              key={[w.cru, w.millesime, w.producteur, w.appellation, w.categorie].join('|')}
               style={{ '--card-accent': ACCENT_COLORS[pillClass], cursor: pillClass === 'liqueur' ? 'default' : 'pointer' }}
               onClick={() => pillClass !== 'liqueur' && setModalWine(w)}
             >
@@ -575,6 +599,7 @@ export default function Cave({ navigate }) {
           wine={modalWine}
           onClose={() => setModalWine(null)}
           onSaved={loadWines}
+          ambiguousLocation={hasCruCollision(wines, modalWine)}
         />
       )}
     </section>

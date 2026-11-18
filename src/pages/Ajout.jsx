@@ -280,11 +280,11 @@ function StepDetails({ form, setForm, onSubmit, submitting, manualProducteur }) 
         <div className="form-row">
           <div className="field">
             <label>Cuvée / Cru</label>
-            <input type="text" placeholder="Ex. Les Charmes" value={form.cru} onChange={set('cru')} />
+            <input type="text" required placeholder="Ex. Les Charmes" value={form.cru} onChange={set('cru')} />
           </div>
           <div className="field">
             <label>Millésime</label>
-            <input type="number" placeholder="2019" value={form.millesime} onChange={set('millesime')} />
+            <input type="number" min="1900" max="2100" placeholder="2019" value={form.millesime} onChange={set('millesime')} />
           </div>
         </div>
 
@@ -292,14 +292,14 @@ function StepDetails({ form, setForm, onSubmit, submitting, manualProducteur }) 
         {(!form.producteur || manualProducteur) && (
           <div className="field">
             <label>Producteur / Domaine</label>
-            <input type="text" placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
+            <input type="text" required placeholder="Ex. Domaine Coche-Dury" value={form.producteur} onChange={set('producteur')} />
           </div>
         )}
 
         <div className="form-row">
           <div className="field">
             <label>Quantité</label>
-            <input type="number" placeholder="6" min="1" value={form.quantite} onChange={set('quantite')} />
+            <input type="number" required placeholder="6" min="1" value={form.quantite} onChange={set('quantite')} />
           </div>
           <div className="field">
             <label>Apogée — début</label>
@@ -341,6 +341,7 @@ export default function Ajout({ navigate }) {
   const [appellationsList, setAppellationsList] = useState([])
   const [producteursList, setProducteursList] = useState([])
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [success, setSuccess] = useState(false)
   const [manualProducteur, setManualProducteur] = useState(false)
 
@@ -393,6 +394,10 @@ export default function Ajout({ navigate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!form.cru.trim() || !form.producteur.trim() || !form.appellation.trim() || !(Number(form.quantite) > 0)) {
+      setSubmitError('Veuillez renseigner le cru, le producteur, l’appellation et une quantité positive.')
+      return
+    }
     console.log('[Ajout] Soumission du formulaire avec les données:', {
       cru: form.cru,
       millesime: form.millesime,
@@ -403,6 +408,7 @@ export default function Ajout({ navigate }) {
       manualProducteur,
     })
     setSubmitting(true)
+    setSubmitError('')
     try {
       // Si le producteur a été saisi manuellement, l'ajouter via l'endpoint /producteur/add
       if (manualProducteur && form.producteur && form.appellation) {
@@ -436,6 +442,7 @@ export default function Ajout({ navigate }) {
       setTimeout(() => setSuccess(false), 4000)
     } catch (error) {
       console.error('[Ajout] Erreur lors de l\'inscription du vin:', error)
+      setSubmitError(error.message || "Impossible d'inscrire ce vin.")
     } finally {
       setSubmitting(false)
     }
@@ -476,6 +483,7 @@ export default function Ajout({ navigate }) {
         </div>
       </div>
 
+      {submitError && <div className="modal-error" role="alert">{submitError}</div>}
       {success && (
         <div className="wz-success">
           <Check size={16} />
