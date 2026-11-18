@@ -1,0 +1,27 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # La configuration du client n'est jamais mise en cache.
+    location = /config.js {
+        add_header Cache-Control "no-store" always;
+    }
+
+    # Les appels frontend vers /api/* sont transmis à l'API backend.
+    # La clé est ajoutée côté Nginx, jamais exposée dans le JavaScript.
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/;
+        proxy_set_header API-Key "${API_KEY}";
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
