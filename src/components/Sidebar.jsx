@@ -1,7 +1,7 @@
-import { Home, Plus, Wine, BarChart2, Clock, Sun, Moon } from 'lucide-react'
+import { Home, Plus, Wine, BarChart2, Clock } from 'lucide-react'
 import ChateauMark from './ChateauMark'
 
-export default function Sidebar({ page, navigate, totalBottles, theme, toggleTheme }) {
+export default function Sidebar({ page, navigate, totalBottles }) {
   const items = [
     { id: 'accueil',    label: 'Accueil',        Icon: Home },
     { id: 'ajout',      label: 'Inscrire un vin', Icon: Plus },
@@ -35,13 +35,6 @@ export default function Sidebar({ page, navigate, totalBottles, theme, toggleThe
         ))}
       </nav>
 
-      <div className="sidebar-appearance">
-        <span className="appearance-caption">Apparence</span>
-        <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'}>
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          <span>Thème {theme === 'dark' ? 'clair' : 'sombre'}</span>
-        </button>
-      </div>
       <div className="sidebar-footer">
         <div className="avatar">P</div>
         <div className="user-info">

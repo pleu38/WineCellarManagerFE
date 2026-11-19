@@ -34,9 +34,9 @@ export default function App() {
   return (
     <>
     <div className="app" inert={showIntro ? true : undefined}>
-      <Sidebar page={page} navigate={navigate} theme={theme} toggleTheme={toggleTheme} />
+      <Sidebar page={page} navigate={navigate} />
       <main>
-        {page === 'accueil'    && <Accueil    navigate={navigate} />}
+        {page === 'accueil'    && <Accueil    navigate={navigate} theme={theme} toggleTheme={toggleTheme} />}
         {page === 'ajout'      && <Ajout      navigate={navigate} />}
         {page === 'cave'       && <Cave       navigate={navigate} />}
         {page === 'analytique' && <Analytique navigate={navigate} />}

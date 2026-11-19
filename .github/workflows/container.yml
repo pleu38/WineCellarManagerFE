@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - ci/build-ghcr-container
+      - feat/mobile-responsive-home-theme
     tags:
       - 'v*'
   workflow_dispatch:
@@ -64,7 +65,7 @@ jobs:
           images: ghcr.io/pleu38/winecellarmanagerfe
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/ci/build-ghcr-container' }}
+            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/ci/build-ghcr-container' || github.ref == 'refs/heads/feat/mobile-responsive-home-theme' }}
             type=ref,event=tag
             type=sha,format=short,prefix=sha-
 

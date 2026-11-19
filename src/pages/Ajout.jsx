@@ -465,13 +465,13 @@ export default function Ajout({ navigate }) {
   }
 
   return (
-    <section className="page">
+    <section className="page page-ajout">
       <div className="page-header">
         <div>
           <h1>Inscrire <em>un vin</em></h1>
           <div className="subtitle">Ajoutez un nouveau cru à votre cave personnelle.</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="page-header-actions">
           <button className="btn ghost" type="button" onClick={reset}>
             <RotateCcw className="btn-icon" />
             Réinitialiser
@@ -562,22 +562,26 @@ export default function Ajout({ navigate }) {
           )}
         </div>
 
-        <div className="preview-card" style={{ alignSelf: 'start' }}>
+        <div className="preview-card">
           <div className="preview-label">Aperçu en direct</div>
-          <div className="bottle-mockup" style={{
-            '--bottle-color': BOTTLE_COLORS[form.type]?.color,
-            '--bottle-dim':   BOTTLE_COLORS[form.type]?.dim,
-          }}>
-            <div className="bottle-label">
-              <div className="bottle-label-text">
-                {preview.name.length > 16 ? preview.name.slice(0, 16) + '…' : preview.name}
+          <div className="preview-body">
+            <div className="preview-bottle-wrap">
+              <div className="bottle-mockup" style={{
+                '--bottle-color': BOTTLE_COLORS[form.type]?.color,
+                '--bottle-dim':   BOTTLE_COLORS[form.type]?.dim,
+              }}>
+                <div className="bottle-label">
+                  <div className="bottle-label-text">
+                    {preview.name.length > 16 ? preview.name.slice(0, 16) + '…' : preview.name}
+                  </div>
+                  <div className="bottle-label-year">{preview.year}</div>
+                </div>
               </div>
-              <div className="bottle-label-year">{preview.year}</div>
             </div>
-          </div>
-          <div className="preview-name">{preview.name}</div>
-          <div className="preview-domain">{preview.domain}</div>
-          <div className="preview-grid">
+            <div className="preview-info">
+              <div className="preview-name">{preview.name}</div>
+              <div className="preview-domain">{preview.domain}</div>
+              <div className="preview-grid">
             <div className="preview-stat">
               <div className="preview-stat-label">Quantité</div>
               <div className="preview-stat-value">{preview.qty}</div>
@@ -593,9 +597,11 @@ export default function Ajout({ navigate }) {
             <div className="preview-stat">
               <div className="preview-stat-label">Apogée</div>
               <div className="preview-stat-value">{preview.apo}</div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   )

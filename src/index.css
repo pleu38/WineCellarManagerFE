@@ -2828,3 +2828,164 @@ h1 em {
   .intro-screen *, .intro-screen *::before, .intro-screen *::after { animation: none !important; transition: none !important; }
   .intro-rule span { width: 100%; }
 }
+
+
+/* ── Maison des Vins · accueil avec filigrane château et thème discret ── */
+.hero {
+  isolation: isolate;
+}
+.hero::after {
+  content: "♜";
+  position: absolute;
+  z-index: 0;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-52%) rotate(-10deg);
+  font: 400 clamp(190px, 24vw, 380px)/1 Georgia, serif;
+  color: rgba(139, 21, 56, 0.09);
+  pointer-events: none;
+  user-select: none;
+}
+:root[data-theme="dark"] .hero::after {
+  color: rgba(230, 184, 117, 0.12);
+}
+.hero-content, .hero-stats { z-index: 1; }
+.hero-theme-toggle {
+  position: absolute;
+  z-index: 3;
+  top: 17px;
+  right: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s;
+}
+.hero-theme-toggle:hover { background: var(--bg-soft); border-color: var(--gold); color: var(--bordeaux); }
+.hero-theme-toggle:focus-visible { outline: 2px solid var(--bordeaux); outline-offset: 3px; }
+.hero-greeting { padding-right: 30px; }
+
+/* ── Inscription : la grille doit céder avant le débordement des colonnes ── */
+.page-ajout, .page-cave { min-width: 0; }
+.page-ajout .wz-layout { grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); }
+.page-ajout .wz-main, .page-ajout .preview-card { min-width: 0; }
+.page-ajout .preview-body { min-width: 0; }
+.page-ajout .preview-bottle-wrap { min-width: 0; }
+.page-ajout .preview-info { min-width: 0; }
+.page-ajout .preview-name, .page-ajout .preview-domain, .page-ajout .preview-stat-value { overflow-wrap: anywhere; }
+.page-ajout .page-header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.page-ajout .wz-item, .page-ajout .type-option { min-width: 0; }
+.page-ajout .wz-name { min-width: 0; overflow-wrap: anywhere; }
+.page-ajout .field input, .page-ajout .field select, .page-ajout .field textarea { min-width: 0; width: 100%; }
+.page-ajout .type-selector { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.page-ajout .form-row, .page-ajout .form-row.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page-ajout .form-row > .field { min-width: 0; }
+
+/* ── Ma cave : largeur fluide, filtres accessibles et cartes compactes ── */
+.page-cave .wine-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 205px), 1fr)); gap: 12px; }
+.page-cave .wine-card { min-width: 0; padding: 16px; }
+.page-cave .wine-name, .page-cave .wine-domain, .page-cave .wine-region { overflow-wrap: anywhere; }
+.page-cave .wine-name { font-size: 21px; }
+.page-cave .wine-card-top { gap: 8px; }
+.page-cave .filter-chips { max-width: 100%; min-width: 0; }
+.page-cave .chip { white-space: nowrap; }
+
+/* ── Tablettes : formulaire et aperçu à la suite, comme la référence HTML ── */
+@media (max-width: 1100px) {
+  .page-ajout .wz-layout { grid-template-columns: minmax(0, 1fr); }
+  .page-ajout .preview-card { position: static; }
+  .page-ajout .preview-body { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 20px; }
+  .page-ajout .preview-bottle-wrap .bottle-mockup { margin: 0 auto; }
+  .page-ajout .preview-info .preview-name, .page-ajout .preview-info .preview-domain { text-align: left; }
+}
+
+/* ── Téléphones ── */
+@media (max-width: 600px) {
+  main { min-width: 0; }
+  .page-ajout .page-header, .page-cave .page-header { gap: 16px; margin-bottom: 20px; }
+  .page-ajout .page-header h1, .page-cave .page-header h1 { font-size: clamp(34px, 9vw, 43px); }
+  .page-ajout .subtitle, .page-cave .subtitle { font-size: 13px; line-height: 1.5; }
+  .page-ajout .page-header-actions { width: 100%; }
+  .page-ajout .page-header-actions .btn { flex: 1; justify-content: center; }
+  .page-cave .page-header > .btn { min-height: 44px; }
+  .page-ajout .wz-stepper {
+    padding: 14px 6px;
+    margin-bottom: 16px;
+    justify-content: space-between;
+    gap: 0;
+    border-radius: 14px;
+    min-width: 0;
+  }
+  .page-ajout .wz-stepper-item { flex: 0 1 52px; min-width: 0; gap: 6px; }
+  .page-ajout .wz-connector { min-width: 0; flex: 1 1 0; margin-top: 17px; }
+  .page-ajout .wz-circle { width: 36px; height: 36px; flex-shrink: 0; }
+  .page-ajout .wz-label { font-size: 9px; letter-spacing: 0; max-width: 64px; overflow-wrap: anywhere; text-align: center; white-space: normal; }
+  .page-ajout .wz-main { min-height: 0; border-radius: 14px; }
+  .page-ajout .wz-step { padding: 18px 14px; gap: 16px; }
+  .page-ajout .wz-step-title { font-size: 26px; }
+  .page-ajout .wz-list { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .page-ajout .wz-item { padding: 12px 9px; min-height: 48px; }
+  .page-ajout .wz-name { font-size: 12px; }
+  .page-ajout .form-row, .page-ajout .form-row.three { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .page-ajout .type-selector { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .page-ajout .type-option { padding: 12px 5px; }
+  .page-ajout .type-label { font-size: 11px; overflow-wrap: anywhere; }
+  .page-ajout .field input, .page-ajout .field select, .page-ajout .field textarea { font-size: 16px; min-height: 44px; }
+  .page-ajout .form-actions .btn { min-height: 48px; justify-content: center; width: 100%; }
+  .page-ajout .preview-card { padding: 15px; border-radius: 16px; }
+  .page-ajout .preview-label { margin-bottom: 10px; }
+  .page-ajout .preview-body { grid-template-columns: 100px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .page-ajout .preview-bottle-wrap .bottle-mockup { transform: scale(.65); transform-origin: center; margin: -35px auto; }
+  .page-ajout .preview-name { font-size: 20px; }
+  .page-ajout .preview-domain { margin-bottom: 10px; font-size: 12px; }
+  .page-ajout .preview-grid { gap: 6px; padding-top: 10px; }
+  .page-ajout .preview-stat { padding: 8px; }
+  .page-ajout .preview-stat-label { font-size: 8px; letter-spacing: .06em; }
+  .page-ajout .preview-stat-value { font-size: 12px; }
+
+  .page-cave .toolbar { gap: 11px; margin-bottom: 18px; }
+  .page-cave .search-box { width: 100%; max-width: none; flex: 1 1 100%; }
+  .page-cave .search-box input { min-height: 46px; font-size: 16px; }
+  .page-cave .filter-chips {
+    display: flex; flex: 1 1 100%; width: 100%; max-width: 100%;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .page-cave .chip { min-height: 40px; padding: 9px 12px; flex: 0 0 auto; }
+  .page-cave .wine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .page-cave .wine-card { padding: 13px 11px; border-radius: 13px; }
+  .page-cave .wine-card-top { margin-bottom: 12px; align-items: flex-start; }
+  .page-cave .color-pill { font-size: 9px; padding: 4px 7px; min-width: 0; overflow-wrap: anywhere; }
+  .page-cave .wine-millesime { font-size: 17px; flex-shrink: 0; }
+  .page-cave .wine-name { font-size: 19px; }
+  .page-cave .wine-domain { font-size: 12px; }
+  .page-cave .wine-region { font-size: 10px; letter-spacing: 0; margin-bottom: 12px; }
+  .page-cave .wine-footer { padding-top: 10px; }
+  .page-cave .stock-num { font-size: 24px; }
+  .modal-rows { min-width: 0; }
+  .modal-row-top { flex-wrap: wrap; gap: 10px; }
+  .modal-raison-chips { flex-wrap: wrap; }
+  .modal-raison-chips .raison-chip { min-width: 88px; }
+  .modal-loc-fields { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .modal-location-row { flex-wrap: wrap; }
+  .modal-location-item { min-width: 84px; }
+  .modal-action-row .btn, .modal-extra-btns .btn { min-width: 0; }
+  .hero { padding: 68px 20px 24px; }
+  .hero::after { font-size: clamp(170px, 65vw, 280px); right: -10%; top: 38%; opacity: .62; }
+  .hero-theme-toggle { top: 15px; right: 15px; width: 38px; height: 38px; }
+}
+@media (max-width: 370px) {
+  .page-cave .wine-grid { grid-template-columns: minmax(0, 1fr); }
+  .page-ajout .wz-list { grid-template-columns: minmax(0,1fr); }
+  .page-ajout .wz-stepper { padding: 12px 4px; }
+  .page-ajout .wz-label { font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-theme-toggle, .page-cave .wine-card { transition: none; }
+}

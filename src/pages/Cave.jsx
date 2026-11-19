@@ -510,7 +510,7 @@ export default function Cave({ navigate }) {
   }, [groupedWines, search, activeRobe])
 
   return (
-    <section className="page">
+    <section className="page page-cave">
       <div className="page-header">
         <div>
           <h1>Ma <em>cave</em></h1>
