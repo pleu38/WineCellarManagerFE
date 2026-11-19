@@ -602,6 +602,7 @@ export default function Ajout({ navigate }) {
           </div>
         </div>
       </div>
+      </div>
     </section>
   )
 }
