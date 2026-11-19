@@ -4,7 +4,13 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# Verifier que les ecrans attendus sont bien dans la compilation finale.
+ARG BUILD_REVISION=unknown
+RUN npm run build \
+    && grep -R -q "hero-theme-toggle" dist/assets \
+    && grep -R -q "page-ajout" dist/assets \
+    && grep -R -q "page-cave" dist/assets \
+    && printf '{"revision":"%s"}\\n' "$BUILD_REVISION" > dist/build-info.json
 
 # Nginx expose le frontend et transmet /api au backend.
 FROM nginx:1.27-alpine

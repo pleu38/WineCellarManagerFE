@@ -1,4 +1,4 @@
-name: Compiler et publier Vinothèque (GHCR)
+name: Compiler et publier Maison des Vins (GHCR)
 
 on:
   pull_request:
@@ -44,6 +44,12 @@ jobs:
       - name: Compiler le frontend
         run: npm run build
 
+      - name: Vérifier le contenu réel de la compilation
+        run: |
+          grep -R -q "hero-theme-toggle" dist/assets
+          grep -R -q "page-ajout" dist/assets
+          grep -R -q "page-cave" dist/assets
+
       - name: Activer QEMU pour les architectures ARM
         uses: docker/setup-qemu-action@v3
 
@@ -65,7 +71,7 @@ jobs:
           images: ghcr.io/pleu38/winecellarmanagerfe
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/ci/build-ghcr-container' || github.ref == 'refs/heads/feat/mobile-responsive-home-theme' }}
+            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci/build-ghcr-container' || github.ref == 'refs/heads/feat/mobile-responsive-home-theme' }}
             type=ref,event=tag
             type=sha,format=short,prefix=sha-
 
@@ -76,6 +82,10 @@ jobs:
           file: ./Containerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
+          pull: true
+          no-cache: ${{ github.ref == 'refs/heads/main' }}
+          build-args: |
+            BUILD_REVISION=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
