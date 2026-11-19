@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, BarChart2, Clock } from 'lucide-react'
+import { Plus, Search, BarChart2, Clock, Moon, Sun } from 'lucide-react'
 import { getLastWines, getSumCru, getSumRegion, getBottleHistory } from '../api/wineApi'
 
 function formatRelativeDate(dateStr) {
@@ -22,7 +22,7 @@ function greeting() {
   return h >= 18 ? 'Bonsoir' : 'Bonjour'
 }
 
-export default function Accueil({ navigate }) {
+export default function Accueil({ navigate, theme, toggleTheme }) {
   const [lastWines, setLastWines] = useState([])
   const [history, setHistory] = useState([])
   const [totalBottles, setTotalBottles] = useState('—')
@@ -66,6 +66,16 @@ export default function Accueil({ navigate }) {
   return (
     <section className="page">
       <div className="hero">
+        <button
+          type="button"
+          className="hero-theme-toggle"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'}
+          title={theme === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre'}
+          aria-pressed={theme === 'dark'}
+        >
+          {theme === 'dark' ? <Sun size={19} strokeWidth={1.7} /> : <Moon size={19} strokeWidth={1.7} />}
+        </button>
         <div className="hero-content">
           <div className="hero-greeting">
             <span className="pulse-dot" />
