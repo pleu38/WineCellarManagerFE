@@ -8,6 +8,7 @@ on:
       - main
       - ci/build-ghcr-container
       - feat/mobile-responsive-home-theme
+      - feat/home-dashboard-cards
     tags:
       - 'v*'
   workflow_dispatch:
@@ -71,7 +72,7 @@ jobs:
           images: ghcr.io/pleu38/winecellarmanagerfe
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci/build-ghcr-container' || github.ref == 'refs/heads/feat/mobile-responsive-home-theme' }}
+            type=raw,value=preview,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci/build-ghcr-container' || github.ref == 'refs/heads/feat/mobile-responsive-home-theme' || github.ref == 'refs/heads/feat/home-dashboard-cards' }}
             type=ref,event=tag
             type=sha,format=short,prefix=sha-
 
@@ -90,6 +91,23 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Vérifier preview publiée sur GHCR
+        if: github.ref == 'refs/heads/feat/home-dashboard-cards' && github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          image="ghcr.io/pleu38/winecellarmanagerfe:preview"
+          docker pull --platform linux/amd64 "$image"
+          revision_json="$(docker run --rm --platform linux/amd64 --entrypoint cat "$image" /usr/share/nginx/html/build-info.json)"
+          revision="$(printf '%s' "$revision_json" | jq -er '.revision | select(type == "string")')"
+          echo "Preview publiée : $revision"
+          test "$revision" = "$GITHUB_SHA"
+          docker run --rm --platform linux/amd64 --entrypoint sh "$image" -c '
+            grep -R -q "Votre collection" /usr/share/nginx/html/assets &&
+            grep -R -q "Répartition de la cave" /usr/share/nginx/html/assets &&
+            grep -R -q "Dernière sortie" /usr/share/nginx/html/assets
+          '
+          echo "Preview validée avec les trois nouvelles cartes."
 
       - name: Vérifier latest publiée sur GHCR
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

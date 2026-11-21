@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, BarChart2, Clock, Moon, Sun } from 'lucide-react'
-import { getLastWines, getSumCru, getSumRegion, getBottleHistory } from '../api/wineApi'
+import { Plus, Wine, BarChart2, Clock, Moon, Sun } from 'lucide-react'
+import { getAllWine, getLastWines, getSumCru, getSumRegion, getBottleHistory } from '../api/wineApi'
+import { getCollectionOverview, getCategoryBreakdown, getMostRecentExit } from '../utils/homeCards'
 
 function formatRelativeDate(dateStr) {
   if (!dateStr) return ''
@@ -28,6 +29,10 @@ export default function Accueil({ navigate, theme, toggleTheme }) {
   const [totalBottles, setTotalBottles] = useState('—')
   const [totalRegions, setTotalRegions] = useState('—')
   const [loading, setLoading] = useState(true)
+  const [stock, setStock] = useState(null)
+  const [stockError, setStockError] = useState(false)
+  const [fullHistory, setFullHistory] = useState(null)
+  const [historyError, setHistoryError] = useState(false)
 
   useEffect(() => {
     Promise.allSettled([
@@ -35,16 +40,35 @@ export default function Accueil({ navigate, theme, toggleTheme }) {
       getSumRegion(),
       getLastWines(),
       getBottleHistory(),
-    ]).then(([sum, sumRegion, last, hist]) => {
+      getAllWine(),
+    ]).then(([sum, sumRegion, last, hist, inventory]) => {
       if (sum.status === 'fulfilled' && sum.value?.[0]?.somme != null)
         setTotalBottles(Math.round(sum.value[0].somme))
       if (sumRegion.status === 'fulfilled' && sumRegion.value?.[0]?.compte_region != null)
         setTotalRegions(sumRegion.value[0].compte_region)
-      if (last.status === 'fulfilled') setLastWines(last.value.slice(0, 5))
-      if (hist.status === 'fulfilled') setHistory(hist.value.slice(0, 5))
+      if (last.status === 'fulfilled' && Array.isArray(last.value)) setLastWines(last.value.slice(0, 5))
+      if (hist.status === 'fulfilled' && Array.isArray(hist.value)) {
+        setHistory(hist.value.slice(0, 5))
+        setFullHistory(hist.value)
+      } else {
+        setHistoryError(true)
+      }
+      if (inventory.status === 'fulfilled' && Array.isArray(inventory.value)) {
+        setStock(inventory.value)
+      } else {
+        setStockError(true)
+      }
       setLoading(false)
     })
   }, [])
+
+  const collection = stock === null ? null : getCollectionOverview(stock)
+  const distribution = stock === null ? null : getCategoryBreakdown(stock)
+  const lastExit = getMostRecentExit(fullHistory)
+  const exitDate = lastExit ? new Date(lastExit.time).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+  const exitQuantity = lastExit && Number.isFinite(Number(lastExit.qte_mouvement))
+    ? Math.abs(Number(lastExit.qte_mouvement))
+    : null
 
   const recentActivity = [
     ...lastWines.map((w) => ({
@@ -124,27 +148,73 @@ export default function Accueil({ navigate, theme, toggleTheme }) {
         </div>
       </div>
 
-      <div className="quick-access">
-        <div className="quick-card" onClick={() => navigate('ajout')}>
+      <div className="quick-access" aria-label="Raccourcis et indicateurs de la cave">
+        <button type="button" className="quick-card home-summary-card" onClick={() => navigate('ajout')}>
           <div className="quick-icon"><Plus size={20} /></div>
           <div className="quick-title">Nouvelle entrée</div>
           <div className="quick-desc">Inscrire un cru au registre</div>
-        </div>
-        <div className="quick-card" onClick={() => navigate('cave')}>
-          <div className="quick-icon"><Search size={20} /></div>
-          <div className="quick-title">Rechercher</div>
-          <div className="quick-desc">Parmi {totalBottles} références</div>
-        </div>
-        <div className="quick-card" onClick={() => navigate('analytique')}>
+          <span className="home-card-link">Inscrire un vin <span aria-hidden="true">↗</span></span>
+        </button>
+
+        <button type="button" className="quick-card home-summary-card" onClick={() => navigate('cave')}>
+          <div className="quick-icon"><Wine size={20} /></div>
+          <div className="quick-title">Votre collection</div>
+          {loading ? (
+            <div className="home-card-placeholder" aria-label="Chargement de la collection">Chargement…</div>
+          ) : stockError || !collection ? (
+            <div className="home-card-placeholder">Stock indisponible</div>
+          ) : (
+            <>
+              <div className="home-card-metric"><strong>{collection.bottles.toLocaleString('fr-FR')}</strong><span>bouteilles</span></div>
+              <div className="home-card-caption">{collection.cuvees} cuvées · {collection.vintages} millésimes</div>
+            </>
+          )}
+          <span className="home-card-link">Explorer la cave <span aria-hidden="true">↗</span></span>
+        </button>
+
+        <button type="button" className="quick-card home-summary-card" onClick={() => navigate('analytique')}>
           <div className="quick-icon"><BarChart2 size={20} /></div>
-          <div className="quick-title">Statistiques</div>
-          <div className="quick-desc">Tendances et répartition</div>
-        </div>
-        <div className="quick-card" onClick={() => navigate('historique')}>
+          <div className="quick-title">Répartition de la cave</div>
+          {loading ? (
+            <div className="home-card-placeholder" aria-label="Chargement de la répartition">Chargement…</div>
+          ) : stockError || !distribution ? (
+            <div className="home-card-placeholder">Répartition indisponible</div>
+          ) : distribution.total === 0 ? (
+            <div className="home-card-placeholder">Aucune bouteille en stock</div>
+          ) : (
+            <>
+              <div className="home-distribution-track" role="img" aria-label={distribution.segments.map(s => `${s.label} : ${s.quantity} bouteilles, ${Math.round(s.percent)} %`).join(' ; ')}>
+                {distribution.segments.map(s => (
+                  <span key={s.id} className={`home-distribution-segment ${s.id}`} style={{ width: `${s.percent}%` }} />
+                ))}
+              </div>
+              <div className="home-distribution-legend">
+                {[...distribution.segments].sort((a, b) => b.quantity - a.quantity).slice(0, 3).map(s => (
+                  <span key={s.id}><i className={`home-category-dot ${s.id}`} aria-hidden="true" />{s.label} {Math.round(s.percent)} %</span>
+                ))}
+              </div>
+            </>
+          )}
+          <span className="home-card-link">Voir les statistiques <span aria-hidden="true">↗</span></span>
+        </button>
+
+        <button type="button" className="quick-card home-summary-card" onClick={() => navigate('historique')}>
           <div className="quick-icon"><Clock size={20} /></div>
-          <div className="quick-title">Historique</div>
-          <div className="quick-desc">Suivi des sorties</div>
-        </div>
+          <div className="quick-title">Dernière sortie</div>
+          {loading ? (
+            <div className="home-card-placeholder" aria-label="Chargement de la dernière sortie">Chargement…</div>
+          ) : historyError ? (
+            <div className="home-card-placeholder">Historique indisponible</div>
+          ) : lastExit ? (
+            <>
+              <div className="home-card-wine">{lastExit.cru || 'Cru non renseigné'}{lastExit.millesime ? ` · ${lastExit.millesime}` : ''}</div>
+              <div className="home-card-caption">{exitQuantity !== null ? `${exitQuantity} bouteille${exitQuantity > 1 ? 's' : ''} sortie${exitQuantity > 1 ? 's' : ''}` : 'Quantité non renseignée'} · {exitDate}</div>
+            </>
+          ) : (
+            <div className="home-card-placeholder">{fullHistory?.length ? 'Dates de sortie indisponibles' : 'Aucune sortie enregistrée'}</div>
+          )}
+          <span className="home-card-link">Voir les sorties <span aria-hidden="true">↗</span></span>
+        </button>
       </div>
 
       <div className="home-grid">
