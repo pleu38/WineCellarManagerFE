@@ -10,7 +10,7 @@ RUN npm run build \
     && grep -R -q "hero-theme-toggle" dist/assets \
     && grep -R -q "page-ajout" dist/assets \
     && grep -R -q "page-cave" dist/assets \
-    && printf '{"revision":"%s"}\\n' "$BUILD_REVISION" > dist/build-info.json
+    && printf '{"revision":"%s"}' "$BUILD_REVISION" > dist/build-info.json
 
 # Nginx expose le frontend et transmet /api au backend.
 FROM nginx:1.27-alpine

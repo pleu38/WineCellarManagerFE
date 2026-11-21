@@ -97,10 +97,10 @@ jobs:
           set -euo pipefail
           image="ghcr.io/pleu38/winecellarmanagerfe:latest"
           docker pull --platform linux/amd64 "$image"
-          revision="$(docker run --rm --platform linux/amd64 --entrypoint cat "$image" /usr/share/nginx/html/build-info.json)"
-          echo "Version réellement publiée : $revision"
-          expected="$(printf '{"revision":"%s"}' "$GITHUB_SHA")"
-          if [ "$revision" != "$expected" ]; then
+          revision_json="$(docker run --rm --platform linux/amd64 --entrypoint cat "$image" /usr/share/nginx/html/build-info.json)"
+          echo "Métadonnées réellement publiées : $revision_json"
+          revision="$(printf '%s' "$revision_json" | jq -er '.revision | select(type == "string")')"
+          if [ "$revision" != "$GITHUB_SHA" ]; then
             echo "::error::L'image latest n'a pas le commit attendu ($GITHUB_SHA)"
             exit 1
           fi
