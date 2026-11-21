@@ -90,3 +90,23 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Vérifier latest publiée sur GHCR
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          image="ghcr.io/pleu38/winecellarmanagerfe:latest"
+          docker pull --platform linux/amd64 "$image"
+          revision="$(docker run --rm --platform linux/amd64 --entrypoint cat "$image" /usr/share/nginx/html/build-info.json)"
+          echo "Version réellement publiée : $revision"
+          expected="$(printf '{"revision":"%s"}' "$GITHUB_SHA")"
+          if [ "$revision" != "$expected" ]; then
+            echo "::error::L'image latest n'a pas le commit attendu ($GITHUB_SHA)"
+            exit 1
+          fi
+          docker run --rm --platform linux/amd64 --entrypoint sh "$image" -c '
+            grep -R -q "hero-theme-toggle" /usr/share/nginx/html/assets &&
+            grep -R -q "page-ajout" /usr/share/nginx/html/assets &&
+            grep -R -q "page-cave" /usr/share/nginx/html/assets
+          '
+          echo "latest correspond au code du commit $GITHUB_SHA et contient les nouveaux écrans."
