@@ -2989,3 +2989,117 @@ h1 em {
 @media (prefers-reduced-motion: reduce) {
   .hero-theme-toggle, .page-cave .wine-card { transition: none; }
 }
+
+
+/* ── Accueil : cartes de collection, répartition et dernière sortie ── */
+.home-summary-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 215px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  appearance: none;
+}
+.home-summary-card:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+.home-summary-card .quick-title { line-height: 1.3; }
+.home-summary-card .quick-desc { overflow-wrap: anywhere; }
+.home-card-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 8px 0 5px;
+}
+.home-card-metric strong {
+  font: 400 clamp(30px, 2.7vw, 40px)/1 'Instrument Serif', serif;
+  color: var(--text);
+}
+.home-card-metric span { color: var(--text-soft); font-size: 12px; }
+.home-card-caption {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.home-card-placeholder {
+  padding: 11px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.home-card-wine {
+  font: 400 18px/1.25 'Instrument Serif', serif;
+  margin: 9px 0 6px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.home-card-link {
+  margin-top: auto;
+  padding-top: 17px;
+  font: 500 10px/1.4 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .045em;
+  color: var(--bordeaux);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.home-distribution-track {
+  display: flex;
+  overflow: hidden;
+  height: 11px;
+  flex: 0 0 11px;
+  width: 100%;
+  border-radius: 999px;
+  margin: 15px 0 10px;
+  background: var(--bg-soft);
+}
+.home-distribution-segment { display: block; min-width: 0; height: 100%; }
+.home-distribution-segment.rouge, .home-category-dot.rouge { background: #913654; }
+.home-distribution-segment.blanc, .home-category-dot.blanc { background: #d9b77b; }
+.home-distribution-segment.rose, .home-category-dot.rose { background: #d78ca4; }
+.home-distribution-segment.effervescent, .home-category-dot.effervescent { background: #82a8c4; }
+.home-distribution-segment.liqueur, .home-category-dot.liqueur { background: #9d9761; }
+.home-distribution-segment.autres, .home-category-dot.autres { background: #a098a5; }
+.home-distribution-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.home-distribution-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.home-category-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 7px;
+}
+@media (max-width: 600px) {
+  .home-summary-card { padding: 15px 13px; min-height: 205px; }
+  .home-summary-card .quick-icon { margin-bottom: 11px; }
+  .home-summary-card .quick-title { font-size: 13px; }
+  .home-card-metric strong { font-size: 29px; }
+  .home-card-caption { font-size: 10px; }
+  .home-card-wine { font-size: 17px; }
+  .home-card-link { font-size: 9px; letter-spacing: 0; padding-top: 14px; }
+  .home-distribution-legend { font-size: 9px; gap: 4px 7px; }
+}
+@media (max-width: 360px) {
+  .home-summary-card { padding: 13px 10px; }
+  .home-summary-card .quick-title { font-size: 12px; }
+  .home-distribution-legend > span { white-space: normal; }
+}
